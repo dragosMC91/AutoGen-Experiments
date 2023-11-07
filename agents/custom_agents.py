@@ -1,10 +1,6 @@
 import autogen
 from typing import Dict
 
-# https://ai.meta.com/llama/#inside-the-model
-# https://github.com/jmorganca/ollama
-# https://huggingface.co/WizardLM
-
 DEFAULT_FILE_LOCATION = '.'
 DEFAULT_REQUEST_TIMEOUT = 300
 DEFAULT_SEED = 42
@@ -13,7 +9,7 @@ DEFAULT_TEMPERATURE = 0
 def get_config(models: list[str]):
     return autogen.config_list_from_json(
         env_or_file="llms_config",
-        file_location='.',
+        file_location=DEFAULT_FILE_LOCATION,
         filter_dict={
             "model": models,
         },
