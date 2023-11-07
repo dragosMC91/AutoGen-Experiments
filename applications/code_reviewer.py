@@ -3,14 +3,6 @@ from operator import itemgetter
 import autogen
 debug = True
 
-gpt3_config = autogen.config_list_from_json(
-    env_or_file="llms_config",
-    file_location='.',
-    filter_dict={
-        "model": ["gpt-3.5-turbo-16k"],
-    },
-)
-
 user_proxy, critic, openai_coder, codellama_coder = itemgetter('user_proxy', 'critic', 'openai_coder', 'codellama_coder')(custom_agents.get_agents())
 agents = custom_agents.get_agents()
 
@@ -20,6 +12,7 @@ manager = autogen.GroupChatManager(groupchat=groupchat, llm_config=custom_agents
 user_proxy.initiate_chat(
     manager,
     message="""
+    First pass the code to openai_coder then the reviewed code goes to codellama_coder and the critic will evaluate the final result
     Give me feedback and suggestions for the following code:
     `````````````````````````````````````
     import autogen

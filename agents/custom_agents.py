@@ -5,6 +5,11 @@ from typing import Dict
 # https://github.com/jmorganca/ollama
 # https://huggingface.co/WizardLM
 
+DEFAULT_FILE_LOCATION = '.'
+DEFAULT_REQUEST_TIMEOUT = 300
+DEFAULT_SEED = 42
+DEFAULT_TEMPERATURE = 0
+
 def get_config(models: list[str]):
     return autogen.config_list_from_json(
         env_or_file="llms_config",
@@ -13,24 +18,30 @@ def get_config(models: list[str]):
             "model": models,
         },
     )
+
 gpt3_config = get_config(["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "gpt-3.5-turbo-16k-0613"])
 
-gpt4_config = get_config(["gpt-4"])
+gpt4_config = get_config(["gpt-4-1106-preview"])
 
 codellama_config = get_config(["ollama/codellama"])
 
 def get_llm_config(specific_config, custom_config=None):
     default_config = {
-        "request_timeout": 300,
-        "seed": 42, # used for caching
+        "request_timeout": DEFAULT_REQUEST_TIMEOUT,
+        "seed": DEFAULT_SEED, # used for caching
         "config_list": specific_config,
-        "temperature": 0,
+        "temperature": DEFAULT_TEMPERATURE,
     }
 
     return default_config if custom_config is None else custom_config.update(default_config)
 
 def get_agents() -> Dict:
-    # Define your agent retrieval logic here
+    """
+    Retrieves a dictionary of agent configurations.
+
+    Returns:
+        A dictionary with agent names as keys and their corresponding configurations as values.
+    """
     return {
         "basic_assistant": autogen.AssistantAgent(
             name="basic_assistant",
