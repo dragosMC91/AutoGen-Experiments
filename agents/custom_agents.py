@@ -6,6 +6,7 @@ DEFAULT_REQUEST_TIMEOUT = 300
 DEFAULT_SEED = 42
 DEFAULT_TEMPERATURE = 0
 
+
 def get_config(models: list[str]):
     return autogen.config_list_from_json(
         env_or_file="llms_config",
@@ -15,25 +16,33 @@ def get_config(models: list[str]):
         },
     )
 
-gpt3_config = get_config(["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "gpt-3.5-turbo-16k-0613"])
+
+gpt3_config = get_config(
+    ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "gpt-3.5-turbo-16k-0613"]
+)
 
 gpt4_config = get_config(["gpt-4-1106-preview"])
 
 codellama_config = get_config(["ollama/codellama"])
 
+
 def get_llm_config(specific_config, custom_config=None):
     default_config = {
         "request_timeout": DEFAULT_REQUEST_TIMEOUT,
-        "seed": DEFAULT_SEED, # used for caching
+        "seed": DEFAULT_SEED,  # used for caching
         "config_list": specific_config,
         "temperature": DEFAULT_TEMPERATURE,
     }
 
-    return default_config if custom_config is None else custom_config.update(default_config)
+    return (
+        default_config
+        if custom_config is None
+        else custom_config.update(default_config)
+    )
+
 
 def get_agents() -> Dict:
-    """
-    Retrieves a dictionary of agent configurations.
+    """Retrieves a dictionary of agent configurations.
 
     Returns:
         A dictionary with agent names as keys and their corresponding configurations as values.
@@ -41,24 +50,26 @@ def get_agents() -> Dict:
     return {
         "basic_assistant": autogen.AssistantAgent(
             name="basic_assistant",
-            llm_config=get_llm_config(gpt3_config),  # configuration for autogen's enhanced inference API which is compatible with OpenAI API
+            llm_config=get_llm_config(
+                gpt3_config
+            ),  # configuration for autogen's enhanced inference API which is compatible with OpenAI API
             system_message="""
-            A general-purpose assistant helper. 
-            You are expected to assist with a wide range of tasks, which may include answering questions, 
-            providing explanations, generating ideas, solving problems, and more. 
-            Your goal is to understand the tasks given to you and provide the most accurate and helpful responses possible. 
+            A general-purpose assistant helper.
+            You are expected to assist with a wide range of tasks, which may include answering questions,
+            providing explanations, generating ideas, solving problems, and more.
+            Your goal is to understand the tasks given to you and provide the most accurate and helpful responses possible.
             You should be able to handle any general task passed to you.
-            """ # for defining the role
+            """,  # for defining the role
         ),
         "advanced_assistant": autogen.AssistantAgent(
             name="basic_assistant",
             llm_config=get_llm_config(gpt4_config),
             system_message="""
-            An advanced helper. You are expected to assist with complex tasks, which may include deep analysis, 
-            generating sophisticated ideas, solving intricate problems, and more. 
-            Your goal is to understand the tasks given to you and provide the most accurate, detailed, and insightful responses possible. 
+            An advanced helper. You are expected to assist with complex tasks, which may include deep analysis,
+            generating sophisticated ideas, solving intricate problems, and more.
+            Your goal is to understand the tasks given to you and provide the most accurate, detailed, and insightful responses possible.
             You should be able to handle any advanced task passed to you with a high level of expertise.
-            """
+            """,
         ),
         "nutritionist": autogen.AssistantAgent(
             name="nutritionist",
@@ -66,9 +77,9 @@ def get_agents() -> Dict:
             system_message="""
             You are a vegan dietician/nutritionist. Your task is to analyze the macronutrients (proteins, fats, and carbohydrates)
             of each dish presented to you. Based on your analysis, you will suggest complementary vegan foods that the individual
-            can consume to achieve a balanced intake of vitamins and minerals for the day. 
+            can consume to achieve a balanced intake of vitamins and minerals for the day.
             Additionally, you will provide a total count of all the macronutrients in the dish.
-            """
+            """,
         ),
         "prompt_engineer": autogen.AssistantAgent(
             name="prompt_engineer",
@@ -77,19 +88,19 @@ def get_agents() -> Dict:
             A prompt engineer with detailed knowledge on how various LLMs work. Its roles are:
             Analyzing and interpreting prompts provided by users.
             Refining and optimizing these prompts to ensure that the LLM receives clear, unambiguous instructions, thereby maximizing the quality of the output.
-            Generating suggestions on how to 'prime' or prepare the LLM's context before providing a prompt. 
+            Generating suggestions on how to 'prime' or prepare the LLM's context before providing a prompt.
             This includes understanding the model's limitations and strengths, and tailoring the context accordingly.
             Providing feedback and suggestions to users on how to craft effective prompts based on the specific LLM in use.
-            """
+            """,
         ),
         "master_chef": autogen.AssistantAgent(
             name="master_chef",
             llm_config=get_llm_config(gpt3_config),
             system_message="""
-            A highly skilled and creative vegan chef with extensive knowledge of plant-based ingredients and cuisines from around the world. 
-            This chef is adept at creating nutritious, flavorful, and visually appealing vegan dishes, 
+            A highly skilled and creative vegan chef with extensive knowledge of plant-based ingredients and cuisines from around the world.
+            This chef is adept at creating nutritious, flavorful, and visually appealing vegan dishes,
             and is always up-to-date with the latest trends and innovations in vegan cooking.
-            """
+            """,
         ),
         "critic": autogen.AssistantAgent(
             name="critic",
@@ -137,7 +148,9 @@ def get_agents() -> Dict:
             name="user_proxy",
             human_input_mode="ALWAYS",
             max_consecutive_auto_reply=10,
-            is_termination_msg=lambda x: x.get("content", "").rstrip().endswith("TERMINATE"),
+            is_termination_msg=lambda x: x.get("content", "")
+            .rstrip()
+            .endswith("TERMINATE"),
             code_execution_config={
                 "work_dir": "output",
                 "use_docker": True,  # set to True or image name like "python:3" to use docker
