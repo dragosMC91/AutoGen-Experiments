@@ -5,7 +5,6 @@ import autogen
 user_proxy, nutritionist, master_chef = itemgetter(
     'user_proxy', 'nutritionist', 'master_chef'
 )(custom_agents.get_agents())
-agents = custom_agents.get_agents()
 
 groupchat = autogen.GroupChat(
     agents=[user_proxy, nutritionist, master_chef], messages=[], max_round=10

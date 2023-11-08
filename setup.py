@@ -2,25 +2,50 @@ from typing import List
 from subprocess import check_call
 from setuptools import setup, find_packages
 from distutils.cmd import Command
+from pathlib import Path
+
+
+class CustomCommand(Command):
+    user_options: List[str] = []
+    description = 'A custom command'
+
+    # Required method for the Command interface
+    def initialize_options(self):
+        pass
+
+    def finalize_options(self):
+        pass
 
 
 def create_command(text: str, commands: List[List[str]]):
-    class GeneratedCommand(Command):
-        user_options: List[str] = []
+    class GeneratedCommand(CustomCommand):
         description = text
-
-        # Required method for the Command interface
-        def initialize_options(self):
-            pass
-
-        def finalize_options(self):
-            pass
 
         def run(self):
             for cmd in commands:
                 check_call(cmd)
 
     return GeneratedCommand
+
+
+class ReviewCommand(CustomCommand):
+    user_options = [('file=', 'f', 'File to review')]
+
+    def initialize_options(self):
+        self.file = None
+
+    def finalize_options(self):
+        assert self.file is not None, "You must provide a file to review."
+
+    def read_file(self, file_path):
+        return Path(file_path).read_text()
+
+    def run(self):
+        # Here you can define what it means to "review" a file.
+        # You can add more checks or reviews as needed.
+        check_call(
+            ['python', 'applications/code_reviewer.py', self.read_file(self.file)]
+        )
 
 
 setup(
@@ -46,5 +71,6 @@ setup(
             "Auto format doc strings",
             [['docformatter', '-r', '-i', '.']],
         ),
+        review=ReviewCommand,
     ),
 )

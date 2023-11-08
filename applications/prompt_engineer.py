@@ -5,7 +5,6 @@ import autogen
 user_proxy, prompt_engineer, critic = itemgetter(
     'user_proxy', 'prompt_engineer', 'critic'
 )(custom_agents.get_agents())
-agents = custom_agents.get_agents()
 
 groupchat = autogen.GroupChat(
     agents=[user_proxy, prompt_engineer, critic], messages=[], max_round=10

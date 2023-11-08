@@ -43,7 +43,7 @@ pip install -r requirements.txt
 
 ## Configuration
 
-### Defining the llms config
+### 1. Define the LLMs config
 Copy the `llms_config.example` file to create your own `llms_config` file and fill in your specific API keys and settings.
 
 ```sh
@@ -52,7 +52,7 @@ cp llms_config.example llms_config
 
 Edit the `llms_config` file with your preferred text editor and update the configuration as needed.
 
-### Running setuptools
+### 2. Run setuptools
 Run the following command in the project root to facilitate packages imports throughout the repo.
 ```
 pip install -e .
@@ -62,7 +62,17 @@ This will allow you to import and use the project's modules from anywhere on you
 
 With these steps, you should be ready to work on the project and run the applications.
 
-## Running the Application
+## Useful tools
+### 1. Lint code
+Run the following command
+```
+python setup.py fix
+```
+### 2. Review code from file using gpt4
+```
+python setup.py review --file path/to/file
+```
+## Running the Applications
 
 After setting up the environment and configuration, you can run the applications within the `src/applications/` directory.
 

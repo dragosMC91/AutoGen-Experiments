@@ -152,9 +152,14 @@ def get_agents() -> Dict:
             .rstrip()
             .endswith("TERMINATE"),
             code_execution_config={
-                "work_dir": "output",
-                "use_docker": True,  # set to True or image name like "python:3" to use docker
+                "work_dir": "generated_content",
+                "use_docker": "python:3.10.13",
             },
             llm_config=get_llm_config(gpt3_config),
+            system_message="""
+            Reply TERMINATE if the task has been solved at full satisfaction.
+            Otherwise, reply CONTINUE, or the reason why the task is not solved yet.
+            Can also execute code written by the other agents.
+            """,
         ),
     }
