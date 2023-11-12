@@ -5,10 +5,8 @@ from sys import argv
 # for complex tasks the user can edit this message and execute the script via `python applications/generalist.py`
 # for simple queries the user can just execute `python applications/generalist.py "my question"`.
 multiline_message = """
-Resolve the following query:
-```````````````````````````
-What is the best diet for longevity?
-```````````````````````````
+I have a 1600 watt PSU (seasonic prime px 1600) which is plug into my UPS (BR1000ELCD).
+Will the UPS cause any bottleneck ?
 """
 
 user_proxy, advanced_assistant = itemgetter('user_proxy', 'advanced_assistant')(

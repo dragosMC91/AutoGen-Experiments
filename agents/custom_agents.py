@@ -62,7 +62,7 @@ def get_agents() -> Dict:
             """,  # for defining the role
         ),
         "advanced_assistant": autogen.AssistantAgent(
-            name="basic_assistant",
+            name="advanced_assistant",
             llm_config=get_llm_config(gpt4_config),
             system_message="""
             An advanced helper. You are expected to assist with complex tasks, which may include deep analysis,
@@ -129,7 +129,7 @@ def get_agents() -> Dict:
             """,
         ),
         "openai_coder": autogen.AssistantAgent(
-            name="openai_coder",
+            name="openai_expert_coder",
             llm_config=get_llm_config(gpt4_config),
             system_message="""
             Expert coder responsible for debugging, code optimization, and software design.
