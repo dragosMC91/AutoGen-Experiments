@@ -1,29 +1,46 @@
 from agents import custom_agents
 from operator import itemgetter
 import autogen
+from sys import argv
 
 debug = True
+
+code_to_review = """
+review my code:
+=============================
+console.log();
+=============================
+"""
 
 user_proxy, critic, openai_coder, codellama_coder = itemgetter(
     'user_proxy', 'critic', 'openai_coder', 'codellama_coder'
 )(custom_agents.get_agents())
 
 groupchat = autogen.GroupChat(
-    agents=[user_proxy, critic, openai_coder, codellama_coder],
+    agents=[user_proxy, critic, openai_coder],
     messages=[],
     max_round=10,
 )
 manager = autogen.GroupChatManager(
     groupchat=groupchat,
     llm_config=custom_agents.get_llm_config(custom_agents.gpt3_config),
+    system_message="""
+    Manage the chat between the the coder and the critic.
+    Any coding task will follow this flow:
+    1. Pass task to the coder.
+    2. Pass the output from the coder to the critic.
+    3. Ask the user for input for the next steps.
+    """,
 )
 
 user_proxy.initiate_chat(
     manager,
-    message="""
-    First pass the code to openai_coder then the reviewed code goes to codellama_coder and the critic will evaluate the final result
-    Give me feedback and suggestions for the following code:
-    `````````````````````````````````````
-    `````````````````````````````````````
-    """,
+    message=f"""
+    Review the following code
+    ```````````````````````````
+    {argv[1]}
+    ```````````````````````````
+    """
+    if len(argv) > 1
+    else code_to_review,
 )
