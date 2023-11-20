@@ -103,7 +103,7 @@ litellm --model ollama/codellama --port 30000
 4. update your `llms_config` file with the appropriate localhost url for example
 ```
     {
-        "api_base": "http://localhost:30000",
+        "base_url": "http://localhost:30000",
         "model": "ollama/codellama",
         "api_key":"sk-dummy-key-because-tool-requires-it"
     },

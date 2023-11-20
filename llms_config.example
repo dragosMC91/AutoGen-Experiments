@@ -16,7 +16,7 @@
         "api_key": "sk-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
     },
     {
-        "api_base": "http://localhost:30000",
+        "base_url": "http://localhost:30000",
         "model": "ollama/codellama",
         "api_key":"sk-xxxxx"
     },
