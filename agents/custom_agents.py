@@ -1,3 +1,6 @@
+from autogen.agentchat.contrib.multimodal_conversable_agent import (
+    MultimodalConversableAgent,
+)
 import autogen
 from typing import Dict
 
@@ -22,23 +25,22 @@ gpt3_config = get_config(
 )
 
 gpt4_config = get_config(["gpt-4-1106-preview"])
+gpt4_vision_config = get_config(["gpt-4-vision-preview"])
 
 codellama_config = get_config(["ollama/codellama"])
 
 
 def get_llm_config(specific_config, custom_config=None):
     default_config = {
-        "request_timeout": DEFAULT_REQUEST_TIMEOUT,
-        "seed": DEFAULT_SEED,  # used for caching
+        "timeout": DEFAULT_REQUEST_TIMEOUT,
+        "cache_seed": DEFAULT_SEED,  # used for caching
         "config_list": specific_config,
         "temperature": DEFAULT_TEMPERATURE,
     }
 
-    return (
-        default_config
-        if custom_config is None
-        else custom_config.update(default_config)
-    )
+    if custom_config is not None:
+        default_config.update(custom_config)
+    return default_config
 
 
 def get_agents() -> Dict:
@@ -143,6 +145,14 @@ def get_agents() -> Dict:
             Expert coder responsible for debugging, code optimization, and software design.
             Can interact with other coders in order to improve provided answers.
             """,
+        ),
+        "image_analyst": MultimodalConversableAgent(
+            name="image_analyst",
+            llm_config=get_llm_config(gpt4_vision_config, {"temperature": 0.5}),
+            system_message="""
+            Expert image analyst capable of categorizing all images provided to him.
+            """,
+            max_consecutive_auto_reply=10,
         ),
         "user_proxy": autogen.UserProxyAgent(
             name="user_proxy",
