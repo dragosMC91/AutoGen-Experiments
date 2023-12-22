@@ -2,7 +2,11 @@ from autogen.agentchat.contrib.multimodal_conversable_agent import (
     MultimodalConversableAgent,
 )
 import autogen
+import json
+import os
 from typing import Dict
+from utils import file_utils
+from config import config
 
 DEFAULT_FILE_LOCATION = '.'
 DEFAULT_REQUEST_TIMEOUT = 300
@@ -10,10 +14,13 @@ DEFAULT_SEED = 42
 DEFAULT_TEMPERATURE = 0
 
 
+file_utils.load_env('.env.secrets')
+os.environ["llms_config"] = json.dumps(config.get_llms_config())
+
+
 def get_config(models: list[str]):
     return autogen.config_list_from_json(
-        env_or_file="llms_config",
-        file_location=DEFAULT_FILE_LOCATION,
+        env_or_file='llms_config',
         filter_dict={
             "model": models,
         },
@@ -23,10 +30,9 @@ def get_config(models: list[str]):
 gpt3_config = get_config(
     ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "gpt-3.5-turbo-16k-0613"]
 )
-
 gpt4_config = get_config(["gpt-4-1106-preview"])
+mistral_config = get_config(["openai/mistral-medium"])
 gpt4_vision_config = get_config(["gpt-4-vision-preview"])
-
 codellama_config = get_config(["ollama/codellama"])
 
 
@@ -133,6 +139,14 @@ def get_agents() -> Dict:
         "openai_coder": autogen.AssistantAgent(
             name="openai_expert_coder",
             llm_config=get_llm_config(gpt4_config),
+            system_message="""
+            Expert coder responsible for debugging, code optimization, and software design.
+            Can interact with other coders in order to improve provided answers.
+            """,
+        ),
+        "mistral_coder": autogen.AssistantAgent(
+            name="mistral_coder",
+            llm_config=get_llm_config(mistral_config),
             system_message="""
             Expert coder responsible for debugging, code optimization, and software design.
             Can interact with other coders in order to improve provided answers.
