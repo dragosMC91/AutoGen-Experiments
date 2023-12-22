@@ -3,6 +3,7 @@ from subprocess import check_call
 from setuptools import setup, find_packages
 from distutils.cmd import Command
 from pathlib import Path
+from utils import file_utils
 
 
 class CustomCommand(Command):
@@ -48,6 +49,18 @@ class ReviewCommand(CustomCommand):
         )
 
 
+class StartLiteLLMServerCommand(CustomCommand):
+    def initialize_options(self):
+        self.file = None
+
+    # loading the secrets file is needed to gain access to the mistral api key
+    # without having to expose it in the litellm config file directly
+    file_utils.load_env('.env.secrets')
+
+    def run(self):
+        check_call(['litellm', '--config', 'litellm_config.yml', '--port', '30000'])
+
+
 setup(
     name='autogen-experiments',
     version='0.1.0',
@@ -72,5 +85,6 @@ setup(
             [['docformatter', '-r', '-i', '.']],
         ),
         review=ReviewCommand,
+        litellm=StartLiteLLMServerCommand,
     ),
 )

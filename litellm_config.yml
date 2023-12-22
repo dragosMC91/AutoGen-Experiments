@@ -1,0 +1,12 @@
+model_list:
+  - model_name: ollama/codellama
+    litellm_params:
+      model: "ollama/codellama"
+  - model_name: openai/mistral-medium           
+    litellm_params:               
+      model: openai/mistral-medium
+      api_key: os.environ/MISTRAL_API_KEY
+      api_base: https://api.mistral.ai/v1
+litellm_settings:
+  drop_params: True
+  set_verbose: True

@@ -3,4 +3,4 @@
 output
 __pycache__
 *egg-info
-llms_config
+.env.secrets
