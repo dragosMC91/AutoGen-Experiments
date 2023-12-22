@@ -4,7 +4,7 @@ from setuptools import setup, find_packages
 from distutils.cmd import Command
 from pathlib import Path
 from utils import file_utils
-import os
+
 
 class CustomCommand(Command):
     user_options: List[str] = []
@@ -48,6 +48,7 @@ class ReviewCommand(CustomCommand):
             ['python', 'applications/code_reviewer.py', self.read_file(self.file)]
         )
 
+
 class StartLiteLLMServerCommand(CustomCommand):
     def initialize_options(self):
         self.file = None
@@ -55,10 +56,9 @@ class StartLiteLLMServerCommand(CustomCommand):
     # loading the secrets file is needed to gain access to the mistral api key
     # without having to expose it in the litellm config file directly
     file_utils.load_env('.env.secrets')
+
     def run(self):
-        check_call(
-            ['litellm', '--config', 'litellm_config.yml', '--port', '30000']
-        )
+        check_call(['litellm', '--config', 'litellm_config.yml', '--port', '30000'])
 
 
 setup(

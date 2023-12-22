@@ -44,13 +44,13 @@ pip install -r requirements.txt
 ## Configuration
 
 ### 1. Define the LLMs config
-Copy the `llms_config.example` file to create your own `llms_config` file and fill in your specific API keys and settings.
+Copy the `.env.secrets.example` file to create your own `.env.secrets` file and fill in your specific API keys for services you plan you use like OpenAI or MistralAI.
 
 ```sh
-cp llms_config.example llms_config
+cp .env.secrets.example .env.secrets
 ```
 
-Edit the `llms_config` file with your preferred text editor and update the configuration as needed.
+Edit the `.env.secrets` file with your preferred text editor and update the API keys as needed.
 
 ### 2. Run setuptools
 Run the following command in the project root to facilitate packages imports throughout the repo.
@@ -72,6 +72,12 @@ python setup.py fix
 ```
 python setup.py review --file path/to/file
 ```
+### 3. Start the LiteLLM proxy server
+One of [LiteLLM](https://litellm.vercel.app/docs/)'s strong points is that it offers a unified interface for calling various LLMs among other cool features.
+In this context we use to extend AutoGen's capabilities to use other AI models (which is currently not supported out of the box, but is a WIP).
+```
+python setup.py litellm
+```
 ## Running the Applications
 
 After setting up the environment and configuration, you can run the applications within the `src/applications/` directory.
@@ -89,24 +95,15 @@ The `chef.py` application demonstrates how to use agents to facilitate a convers
 
 ---
 
-## Setup local LLMs
+## Setup local and third party LLMs
 
 1. Install the [ollama tool](https://github.com/jmorganca/ollama)
 2. Download any model you want for example for codellama run
 ```
 ollama run codellama
 ```
-3. Start the model you downloaded locally via `litellm` on the desired port
-```
-litellm --model ollama/codellama --port 30000
-```
-4. update your `llms_config` file with the appropriate localhost url for example
-```
-    {
-        "base_url": "http://localhost:30000",
-        "model": "ollama/codellama",
-        "api_key":"sk-dummy-key-because-tool-requires-it"
-    },
-```
+3. Update the `litellm_config.yml` file to contain the new local model references or references to any other API services like [Mistral AI](https://mistral.ai/).
+4. Start the LiteLLM proxy server 
+See the [3. Start the LiteLLM proxy server](#3-start-the-litellm-proxy-server) section for more information.
 
 Other popular models: https://huggingface.co/WizardLM
