@@ -4,12 +4,13 @@ import logging
 
 def get_llms_config():
     config = [
-        {"model": "gpt-3.5-turbo-16k", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "gpt-3.5-turbo-0125", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-3.5-turbo", "api_key": os.getenv('OPENAI_API_KEY')},
-        {"model": "gpt-3.5-turbo-16k-0613", "api_key": os.getenv('OPENAI_API_KEY')},
-        {"model": "gpt-4", "api_key": os.getenv('OPENAI_API_KEY')},
-        {"model": "gpt-4-1106-preview", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "gpt-3.5-turbo-16k-1106", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "gpt-4-0125-preview", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "gpt-4-turbo-preview", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4-vision-preview", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "dall-e-3", "api_key": os.getenv('OPENAI_API_KEY')},
         {
             "base_url": "http://localhost:30000",
             "model": "openai/mistral-medium",

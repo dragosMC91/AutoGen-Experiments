@@ -3,7 +3,7 @@ from subprocess import check_call
 from setuptools import setup, find_packages
 from distutils.cmd import Command
 from pathlib import Path
-from utils import file_utils
+import importlib
 
 
 class CustomCommand(Command):
@@ -53,11 +53,14 @@ class StartLiteLLMServerCommand(CustomCommand):
     def initialize_options(self):
         self.file = None
 
-    # loading the secrets file is needed to gain access to the mistral api key
-    # without having to expose it in the litellm config file directly
-    file_utils.load_env('.env.secrets')
-
     def run(self):
+        # dynamic import is used in this case because importing dotenv
+        # directly in setup.py throws an error on pip install -e .
+        module = importlib.import_module('utils.file_utils')
+
+        # loading the secrets file is needed to gain access to the mistral api key
+        # without having to expose it in the litellm config file directly
+        module.load_env('.env.secrets')
         check_call(['litellm', '--config', 'litellm_config.yml', '--port', '30000'])
 
 
@@ -69,6 +72,7 @@ setup(
     description='An autogen playground for experimenting.',
     license='none',
     packages=find_packages(),
+    install_requires=(open('requirements.txt').read().splitlines()),
     cmdclass=dict(
         fix=create_command(
             'Auto fix and lint code',

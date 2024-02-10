@@ -28,9 +28,9 @@ def get_config(models: list[str]):
 
 
 gpt3_config = get_config(
-    ["gpt-3.5-turbo-16k", "gpt-3.5-turbo", "gpt-3.5-turbo-16k-0613"]
+    ["gpt-3.5-turbo-0125", "gpt-3.5-turbo", "gpt-3.5-turbo-16k-1106"]
 )
-gpt4_config = get_config(["gpt-4-1106-preview"])
+gpt4_config = get_config(["gpt-4-0125-preview"])
 mistral_config = get_config(["openai/mistral-medium"])
 gpt4_vision_config = get_config(["gpt-4-vision-preview"])
 codellama_config = get_config(["ollama/codellama"])
