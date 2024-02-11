@@ -63,6 +63,15 @@ class StartLiteLLMServerCommand(CustomCommand):
         module.load_env('.env.secrets')
         check_call(['litellm', '--config', 'litellm_config.yml', '--port', '30000'])
 
+class CleanupRepo(CustomCommand):
+    def initialize_options(self):
+        self.file = None
+
+    def run(self):
+        module = importlib.import_module('utils.file_utils')
+
+        module.remove_junk_dirs(module.find_junk_dirs('.', ['.cache', '__pycache__', 'autogen_experiments.egg-info']))
+
 
 setup(
     name='autogen-experiments',
@@ -90,5 +99,6 @@ setup(
         ),
         review=ReviewCommand,
         litellm=StartLiteLLMServerCommand,
+        clean=CleanupRepo,
     ),
 )

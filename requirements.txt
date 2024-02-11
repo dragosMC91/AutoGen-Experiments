@@ -6,6 +6,7 @@ appdirs==1.4.4
 arxiv==2.0.0
 async-timeout==4.0.3
 attrs==23.1.0
+autogenstudio==0.0.44a0
 backoff==2.2.1
 black==23.11.0
 certifi==2023.11.17
