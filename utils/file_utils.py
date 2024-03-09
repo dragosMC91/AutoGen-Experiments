@@ -5,6 +5,7 @@ import logging
 import os
 import shutil
 
+
 def load_env(dotenv_file_path: Optional[str] = None):
     """Load configurations from a specified .env file.
 
@@ -26,9 +27,9 @@ def load_env(dotenv_file_path: Optional[str] = None):
             )
         load_dotenv(dotenv_path)
 
+
 def find_junk_dirs(start_path, junk_dirs):
-    """
-    Recursively finds specified directories within the start_path.
+    """Recursively finds specified directories within the start_path.
 
     :param start_path: The directory path to start searching from.
     :param junk_dirs: A list of directory names to find.
@@ -42,9 +43,9 @@ def find_junk_dirs(start_path, junk_dirs):
                 dirs_to_remove.append(full_path)
     return dirs_to_remove
 
+
 def remove_junk_dirs(dirs_to_remove):
-    """
-    Removes specified directories.
+    """Removes specified directories.
 
     :param dirs_to_remove: A list of directories to remove.
     """

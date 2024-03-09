@@ -33,7 +33,7 @@ gpt3_config = get_config(
 gpt4_config = get_config(["gpt-4-0125-preview"])
 mistral_config = get_config(["openai/mistral-medium"])
 gpt4_vision_config = get_config(["gpt-4-vision-preview"])
-codellama_config = get_config(["ollama/codellama"])
+codellama_config = get_config(["ollama/codellama:34b"])
 
 
 def get_llm_config(specific_config, custom_config=None):

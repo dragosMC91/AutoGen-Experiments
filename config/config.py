@@ -18,7 +18,17 @@ def get_llms_config():
         },
         {
             "base_url": "http://localhost:30000",
-            "model": "ollama/codellama",
+            "model": "mistral/mistral-large",
+            "api_key": "sk-xxxxx",
+        },
+        {
+            "base_url": "http://localhost:30000",
+            "model": "claude-3-opus",
+            "api_key": "sk-xxxxx",
+        },
+        {
+            "base_url": "http://localhost:30000",
+            "model": "ollama/codellama:34b",
             "api_key": "sk-xxxxx",
         },
         {"model": "DALLE 2", "api_key": os.getenv('OPENAI_API_KEY')},

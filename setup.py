@@ -61,7 +61,25 @@ class StartLiteLLMServerCommand(CustomCommand):
         # loading the secrets file is needed to gain access to the mistral api key
         # without having to expose it in the litellm config file directly
         module.load_env('.env.secrets')
-        check_call(['litellm', '--config', 'litellm_config.yml', '--port', '30000'])
+        check_call(
+            ['litellm', '--config', 'litellm_config.yml', '--port', '30000', '--debug']
+        )
+
+
+class StartAutogenStudioCommand(CustomCommand):
+    def initialize_options(self):
+        self.file = None
+
+    def run(self):
+        # dynamic import is used in this case because importing dotenv
+        # directly in setup.py throws an error on pip install -e .
+        module = importlib.import_module('utils.file_utils')
+
+        # loading the secrets file is needed to gain access to the mistral api key
+        # without having to expose it in the litellm config file directly
+        module.load_env('.env.secrets')
+        check_call(['autogenstudio', 'ui', '--port', '8083'])
+
 
 class CleanupRepo(CustomCommand):
     def initialize_options(self):
@@ -70,7 +88,11 @@ class CleanupRepo(CustomCommand):
     def run(self):
         module = importlib.import_module('utils.file_utils')
 
-        module.remove_junk_dirs(module.find_junk_dirs('.', ['.cache', '__pycache__', 'autogen_experiments.egg-info']))
+        module.remove_junk_dirs(
+            module.find_junk_dirs(
+                '.', ['.cache', '__pycache__', 'autogen_experiments.egg-info']
+            )
+        )
 
 
 setup(
@@ -99,6 +121,7 @@ setup(
         ),
         review=ReviewCommand,
         litellm=StartLiteLLMServerCommand,
+        autogenstudio=StartAutogenStudioCommand,
         clean=CleanupRepo,
     ),
 )
