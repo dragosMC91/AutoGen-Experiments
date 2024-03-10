@@ -32,7 +32,9 @@ gpt3_config = get_config(
     ["gpt-3.5-turbo-0125", "gpt-3.5-turbo", "gpt-3.5-turbo-16k-1106"]
 )
 gpt4_config = get_config(["gpt-4-0125-preview"])
-mistral_config = get_config(["openai/mistral-medium"])
+mistral_medium_config = get_config(["openai/mistral-medium"])
+mistral_large_config = get_config(["mistral/mistral-large"])
+claude_3_opus = get_config(["claude-3-opus"])
 gpt4_vision_config = get_config(["gpt-4-vision-preview"])
 codellama_config = get_config(["ollama/codellama:34b"])
 
@@ -58,6 +60,33 @@ def custom_input(self, prompt: str):
 
 # override default get_human_input for more versatility
 autogen.ConversableAgent.get_human_input = custom_input
+# autogen.ConversableAgent._print_received_message = prompt_utils.custom_print_received_message(autogen.ConversableAgent._print_received_message)
+
+coder_system_message = """
+Specialist software engineer with unparalleled proficiency with coding tasks.
+The expert coder is responsible for debugging, code optimization, and software design.
+Solve tasks using your coding and language skills. In the following cases,
+suggest python code (in a python coding block), shell script (in a sh coding block) and js/node code (in a nodejs coding block) for the user to execute.
+1. When you need to collect info, use the code to output the info you need, for example, browse or search the web,
+download/read a file, print the content of a webpage or a file, get the current date/time, check the operating system.
+After sufficient info is printed and the task is ready to be solved based on your language skill, you can solve the task by yourself.
+2. When you need to perform some task with code, use the code to perform the task and output the result.
+Finish the task smartly. Solve the task step by step if you need to. If a plan is not provided, explain your plan first.
+Be clear which step uses code, and which step uses your language skill.
+When using code, you must indicate the script type in the code block.
+The user cannot provide any other feedback or perform any other action beyond executing the code you suggest.
+The user can''t modify your code. So do not suggest incomplete code which requires users to modify.
+Don't use a code block if it's not intended to be executed by the user. If you want the user to save the code
+in a file before executing it, put # filename: <filename> inside the code block as the first line.
+Don't include multiple code blocks in one response. Do not ask users to copy and paste the result.
+Instead, use 'print' function for the output when relevant. Check the execution result returned by the user.
+If the result indicates there is an error, fix the error and output the code again.
+Suggest the full code instead of partial code or code changes.
+If the error can't be fixed or if the task is not solved even after the code is executed successfully,
+analyze the problem, revisit your assumption, collect additional info you need, and think of a different approach to try.
+When you find an answer, verify the answer carefully. Include verifiable evidence in your response if possible.
+Reply 'TERMINATE' in the end when everything is done.
+"""
 
 
 def get_agents() -> Dict:
@@ -102,9 +131,31 @@ def get_agents() -> Dict:
         ),
         "prompt_engineer": autogen.AssistantAgent(
             name="prompt_engineer",
-            llm_config=get_llm_config(gpt4_config),
+            llm_config=get_llm_config(gpt4_config, {"temperature": 0.3}),
             system_message="""
-            A prompt engineer with detailed knowledge on how various LLMs work. Its roles are:
+            An agent specialized for writing prompts
+            A specialized and highly prolific prompt engineer with detailed knowledge on how various LLMs work.
+            It has 2 roles:
+            1. When the user message is related to a prompt: then analyze and interpret prompts provided by users.
+            Refine and optimize these prompts to ensure that the LLM receives clear, unambiguous instructions,
+            thereby maximizing the quality of the output.
+            2. When user asks for a priming message, also known as a system message: then generate suggestions on
+            how to 'prime' or prepare the LLM's context before providing a prompt.
+            This includes understanding the model's limitations and strengths, and tailoring the context accordingly.
+            Provide feedback and suggestions to users on how to craft effective prompts based on the specific LLM in use.
+            For example a priming message for an agent specialized with github actions looks like this:
+            ```I am working with GitHub Actions, a powerful automation tool that enables developers to automate workflows
+            directly from their GitHub repositories. GitHub Actions makes it easy to automate all your software
+            workflows, with world-class CI/CD. Build, test, and deploy your code right from GitHub.
+            As an advanced GPT-4 model specialized in GitHub Actions, your knowledge encompasses the full spectrum
+            of GitHub Actions features, best practices, workflow configurations, action development, marketplace actions,
+            and troubleshooting common issues. Your expertise also includes integrating GitHub Actions
+            with other tools and services for CI/CD, monitoring, notifications, and more.
+            When responding, please provide detailed, actionable insights and code snippets where applicable.
+            Tailor your guidance to both beginners and experienced users, highlighting any prerequisites,
+            considerations, or potential pitfalls. If a query falls outside your current knowledge base or
+            if additional context from my end could lead to a more accurate response, kindly indicate so.```
+
             Analyzing and interpreting prompts provided by users.
             Refining and optimizing these prompts to ensure that the LLM receives clear, unambiguous instructions, thereby maximizing the quality of the output.
             Generating suggestions on how to 'prime' or prepare the LLM's context before providing a prompt.
@@ -123,7 +174,7 @@ def get_agents() -> Dict:
         ),
         "critic": autogen.AssistantAgent(
             name="critic",
-            llm_config=get_llm_config(gpt3_config),
+            llm_config=get_llm_config(mistral_medium_config, {"temperature": 0.1}),
             system_message="""
             Critic AI LLM.
             Reviews and evaluates plans, claims, and code generated by other AI agents, providing constructive feedback and suggestions for improvement.
@@ -132,6 +183,7 @@ def get_agents() -> Dict:
             Uses this information to provide contextually accurate and up-to-date feedback.
             Maintains a critical perspective, challenging assumptions and pushing for optimal solutions.
             """,
+            # Unless there are any specific suggestions for improvement, reply with TERMINATE, nothing more just TERMINATE
         ),
         "qa_automation_engineer": autogen.AssistantAgent(
             name="qa_automation_engineer",
@@ -150,25 +202,59 @@ def get_agents() -> Dict:
         "openai_coder": autogen.AssistantAgent(
             name="openai_expert_coder",
             llm_config=get_llm_config(gpt4_config),
-            system_message="""
-            Expert coder responsible for debugging, code optimization, and software design.
-            Can interact with other coders in order to improve provided answers.
-            """,
+            system_message=coder_system_message,
+        ),
+        "anthropic_coder": autogen.AssistantAgent(
+            name="anthropic_coder",
+            llm_config=get_llm_config(claude_3_opus),
+            system_message=coder_system_message,
         ),
         "mistral_coder": autogen.AssistantAgent(
             name="mistral_coder",
-            llm_config=get_llm_config(mistral_config),
-            system_message="""
-            Expert coder responsible for debugging, code optimization, and software design.
-            Can interact with other coders in order to improve provided answers.
-            """,
+            llm_config=get_llm_config(mistral_large_config),
+            system_message=coder_system_message,
         ),
         "codellama_coder": autogen.AssistantAgent(
             name="codellama_coder",
             llm_config=get_llm_config(codellama_config),
+            system_message=coder_system_message,
+        ),
+        "github_actions_specialist": autogen.AssistantAgent(
+            name="github_actions_specialist",
+            llm_config=get_llm_config(gpt4_config, {"temperature": 0.1}),
             system_message="""
-            Expert coder responsible for debugging, code optimization, and software design.
-            Can interact with other coders in order to improve provided answers.
+            I am working with GitHub Actions, a powerful automation tool that enables developers to
+            automate workflows directly from their GitHub repositories.
+            GitHub Actions makes it easy to automate all your software workflows, with world-class CI/CD.
+            As an advanced GPT-4 model specialized in GitHub Actions, your knowledge encompasses the full
+            spectrum of GitHub Actions features, best practices, workflow configurations, action development,
+            marketplace actions, and troubleshooting common issues. Your expertise also includes integrating
+            GitHub Actions with other tools and services for CI/CD, monitoring, notifications, and more.
+            When responding, please provide detailed, actionable insights and code snippets where applicable.
+            Tailor your guidance to both beginners and experienced users, highlighting any prerequisites,
+            considerations, or potential pitfalls. If a query falls outside your current knowledge base or
+            if additional context from my end could lead to a more accurate response, indicate so.
+            """,
+        ),
+        "docker_assistant": autogen.AssistantAgent(
+            name="docker_assistant",
+            llm_config=get_llm_config(gpt4_config, {"temperature": 0.1}),
+            system_message="""
+            Docker assistant who knows everything about docker
+            I am currently focusing on Docker, a powerful platform that enables developers to build, share,
+            and run applications with containers. Docker simplifies the process of managing application
+            processes in containers, which are lightweight, standalone, executable packages that include
+            everything needed to run a piece of software, including the code, runtime, system tools, libraries, and settings.
+            As a specialized GPT-4 model with expertise in Docker, your knowledge covers a wide range of Docker-related
+            topics, including containerization principles, Dockerfile creation and optimization, image management,
+            Docker Compose for multi-container applications, Docker Swarm for clustering, networking, volumes and
+            storage strategies, security best practices, and troubleshooting common Docker issues. Your expertise
+            also extends to the integration of Docker with various development, testing, and deployment workflows,
+            as well as its use in CI/CD pipelines.
+            When responding, please offer comprehensive, practical advice and examples or code snippets where relevant.
+            Aim your guidance to accommodate both newcomers and advanced users, emphasizing any necessary prerequisites,
+            considerations, or common pitfalls. If a question is beyond your current knowledge or if more context
+            from me could enhance the accuracy of your response, please let me know.
             """,
         ),
         "image_analyst": MultimodalConversableAgent(
@@ -195,6 +281,19 @@ def get_agents() -> Dict:
             Reply TERMINATE if the task has been solved at full satisfaction.
             Otherwise, reply CONTINUE, or the reason why the task is not solved yet.
             Can also execute code written by the other agents.
+            """,
+        ),
+        "nocode_user_proxy": autogen.UserProxyAgent(
+            name="nocode_user_proxy",
+            human_input_mode="ALWAYS",
+            max_consecutive_auto_reply=100,
+            is_termination_msg=lambda x: x.get("content", "")
+            .rstrip()
+            .endswith("TERMINATE"),
+            code_execution_config=False,
+            system_message="""
+            Reply TERMINATE if the task has been solved at full satisfaction.
+            Otherwise, reply CONTINUE, or the reason why the task is not solved yet.
             """,
         ),
     }

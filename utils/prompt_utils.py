@@ -3,6 +3,9 @@ from pygments.lexers import guess_lexer
 from pygments.lexer import Lexer
 from prompt_toolkit.lexers import PygmentsLexer
 from prompt_toolkit import prompt as toolkit_prompt
+from contextlib import contextmanager
+from rich import print as rich_print
+import builtins
 
 
 class CustomLexer(Lexer):
@@ -32,10 +35,34 @@ def ask_for_prompt_input(
     )
 
 
+def ask_for_initial_prompt_input():
+    prompt = ask_for_prompt_input()
+    return prompt + '\n' + '-' * 80
+
+
 def is_non_empty_prompt(prompt):
     pattern = r'^[\r\n\t\f\v ]*$'
     return not bool(re.match(pattern, prompt))
 
 
 def get_initial_prompt(prompt):
-    return prompt if is_non_empty_prompt(prompt) else ask_for_prompt_input()
+    return prompt if is_non_empty_prompt(prompt) else ask_for_initial_prompt_input()
+
+
+@contextmanager
+def override_print():
+    original_print = builtins.print
+    builtins.print = rich_print
+    try:
+        yield
+    finally:
+        builtins.print = original_print
+
+
+# Function which overrides the print statements inside any function
+def custom_print_received_message(original_method):
+    def wrapper(self, *args, **kwargs):
+        with override_print():
+            original_method(self, *args, **kwargs)
+
+    return wrapper

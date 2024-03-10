@@ -1,29 +1,26 @@
 from agents import custom_agents
 from operator import itemgetter
-import autogen
 from utils import prompt_utils
+import autogen
 
-debug = True
-
-code_to_review = """
-review my code:
-=============================
-console.log();
-=============================
+message = """
 """
 
-user_proxy, critic, openai_coder, codellama_coder = itemgetter(
-    'user_proxy', 'critic', 'openai_coder', 'codellama_coder'
-)(custom_agents.get_agents())
+user_proxy, openai_coder, critic = itemgetter('user_proxy', 'openai_coder', 'critic')(
+    custom_agents.get_agents()
+)
 
 groupchat = autogen.GroupChat(
-    agents=[user_proxy, critic, openai_coder],
+    agents=[user_proxy, openai_coder, critic],
     messages=[],
-    max_round=10,
+    speaker_selection_method="round_robin",
+    max_round=20,
 )
+
 manager = autogen.GroupChatManager(
     groupchat=groupchat,
     llm_config=custom_agents.get_llm_config(custom_agents.gpt3_config),
+    code_execution_config=False,
     system_message="""
     Manage the chat between the the coder and the critic.
     Any coding task will follow this flow:
@@ -33,12 +30,8 @@ manager = autogen.GroupChatManager(
     """,
 )
 
+# the assistant receives a message from the user, which contains the task description
 user_proxy.initiate_chat(
     manager,
-    message=f"""
-    Review the following code
-    ```````````````````````````
-    {prompt_utils.get_initial_prompt(code_to_review)}
-    ```````````````````````````
-    """,
+    message=prompt_utils.get_initial_prompt(message),
 )

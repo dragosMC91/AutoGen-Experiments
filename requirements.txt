@@ -38,8 +38,10 @@ idna==3.4
 importlib-metadata==6.8.0
 Jinja2==3.1.2
 litellm==1.30.5
+markdown-it-py==3.0.0
 MarkupSafe==2.1.3
 mccabe==0.7.0
+mdurl==0.1.2
 multidict==6.0.4
 mypy-extensions==1.0.0
 numpy==1.26.2
@@ -67,6 +69,7 @@ PyYAML==6.0.1
 redis==5.0.2
 regex==2023.10.3
 requests==2.31.0
+rich==13.7.1
 rq==1.16.1
 sgmllib3k==1.0.0
 six==1.16.0
