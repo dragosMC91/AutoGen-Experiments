@@ -1,6 +1,16 @@
 from agents import custom_agents
 from operator import itemgetter
 import autogen
+from utils import prompt_utils
+
+multiline_message = """
+I am defining the following role for a coder ai LLM:
+```
+Expert coder responsible for debugging, code optimization, and software design.
+```
+This is used to better set the context before i actually start giving it tasks.
+Suggest how to improve this this role definition.
+"""
 
 user_proxy, prompt_engineer, critic = itemgetter(
     'user_proxy', 'prompt_engineer', 'critic'
@@ -16,12 +26,5 @@ manager = autogen.GroupChatManager(
 
 user_proxy.initiate_chat(
     manager,
-    message="""
-    I am defining the following role for a coder ai LLM:
-    ```
-    Expert coder responsible for debugging, code optimization, and software design.
-    ```
-    This is used to better set the context before i actually start giving it tasks.
-    Suggest how to improve this this role definition.
-    """,
+    message=prompt_utils.get_initial_prompt(multiline_message),
 )

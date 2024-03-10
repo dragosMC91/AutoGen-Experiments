@@ -8,26 +8,26 @@ Before you begin, ensure you have either `pyenv` or `conda` installed on your sy
 
 ## Python Version
 
-This project is tested with Python `3.10.13`. It is recommended to use this specific version to avoid any compatibility issues.
+This project is tested with Python `3.11.8`. It is recommended to use this specific version to avoid any compatibility issues.
 
 ## Environment Setup
 
 ### Using pyenv
 
-If you are using `pyenv`, you can install Python `3.10.13` and set it as the local version for the project using the following commands:
+If you are using `pyenv`, you can install Python `3.11.8` and set it as the local version for the project using the following commands:
 
 ```sh
-pyenv install 3.10.13
-pyenv local 3.10.13
+pyenv install 3.11.8
+pyenv local 3.11.8
 pyenv virtualenv myenv
 ```
 
 ### Using conda
 
-If you prefer `conda`, create a new environment with Python `3.10.13` using the following command:
+If you prefer `conda`, create a new environment with Python `3.11.8` using the following command:
 
 ```sh
-conda create --name myenv python=3.10.13
+conda create --name myenv python=3.11.8
 conda activate myenv
 ```
 
@@ -84,7 +84,9 @@ After setting up the environment and configuration, you can run the applications
 
 
 ## Applications
-Make sure to tweak the requirement message inside each application before running the code.
+Executing an application creates a new conversation session based on the flow defined in that app.
+You can either tweak the `multiline_message` inside each application, or execute the script and input your prompt in the command line (recommended).
+Prompts have multiline support so `Enter` just inserts a new line. In order to submit the prompt press `(Meta|Esc)+Enter`.
 
 ### chef.py
 ```

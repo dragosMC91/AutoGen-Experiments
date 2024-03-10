@@ -1,7 +1,7 @@
 from agents import custom_agents
 from operator import itemgetter
 import autogen
-from sys import argv
+from utils import prompt_utils
 
 debug = True
 
@@ -38,9 +38,7 @@ user_proxy.initiate_chat(
     message=f"""
     Review the following code
     ```````````````````````````
-    {argv[1]}
+    {prompt_utils.get_initial_prompt(code_to_review)}
     ```````````````````````````
-    """
-    if len(argv) > 1
-    else code_to_review,
+    """,
 )

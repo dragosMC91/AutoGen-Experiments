@@ -1,6 +1,11 @@
 from agents import custom_agents
 from operator import itemgetter
 import autogen
+from utils import prompt_utils
+
+multiline_message = """
+I want to make vegan lasagna in my tefal pressure cooker. How can i do it ?
+"""
 
 user_proxy, nutritionist, master_chef = itemgetter(
     'user_proxy', 'nutritionist', 'master_chef'
@@ -16,7 +21,5 @@ manager = autogen.GroupChatManager(
 
 user_proxy.initiate_chat(
     manager,
-    message="""
-    I want to make vegan lasagna in my tefal pressure cooker. How can i do it ?
-    """,
+    message=prompt_utils.get_initial_prompt(multiline_message),
 )

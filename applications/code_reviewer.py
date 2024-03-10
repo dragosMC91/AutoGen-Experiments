@@ -1,9 +1,8 @@
 from agents import custom_agents
-from sys import argv
 from operator import itemgetter
+from utils import prompt_utils
 
 code_to_review = """
-print("hello world")
 """
 
 user_proxy, openai_coder = itemgetter('user_proxy', 'openai_coder')(
@@ -16,9 +15,7 @@ user_proxy.initiate_chat(
     message=f"""
     Review the following code
     ```````````````````````````
-    {argv[1]}
+    {prompt_utils.get_initial_prompt(code_to_review)}
     ```````````````````````````
-    """
-    if len(argv) > 1
-    else code_to_review,
+    """,
 )

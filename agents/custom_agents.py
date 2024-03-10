@@ -7,6 +7,7 @@ import os
 from typing import Dict
 from utils import file_utils
 from config import config
+from utils import prompt_utils
 
 DEFAULT_FILE_LOCATION = '.'
 DEFAULT_REQUEST_TIMEOUT = 300
@@ -47,6 +48,16 @@ def get_llm_config(specific_config, custom_config=None):
     if custom_config is not None:
         default_config.update(custom_config)
     return default_config
+
+
+def custom_input(self, prompt: str):
+    reply = prompt_utils.ask_for_prompt_input(prompt=prompt)
+    self._human_input.append(reply)
+    return reply
+
+
+# override default get_human_input for more versatility
+autogen.ConversableAgent.get_human_input = custom_input
 
 
 def get_agents() -> Dict:

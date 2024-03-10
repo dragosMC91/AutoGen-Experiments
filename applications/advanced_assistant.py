@@ -1,6 +1,11 @@
 from agents import custom_agents
 from operator import itemgetter
 import autogen
+from utils import prompt_utils
+
+multiline_message = """
+Who should read this paper: https://arxiv.org/abs/2308.08155
+"""
 
 user_proxy, advanced_assistant, critic = itemgetter(
     'user_proxy', 'advanced_assistant', 'critic'
@@ -17,7 +22,5 @@ manager = autogen.GroupChatManager(
 
 user_proxy.initiate_chat(
     manager,
-    message="""
-    Who should read this paper: https://arxiv.org/abs/2308.08155
-    """,
+    message=prompt_utils.get_initial_prompt(multiline_message),
 )
