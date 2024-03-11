@@ -60,7 +60,11 @@ def custom_input(self, prompt: str):
 
 # override default get_human_input for more versatility
 autogen.ConversableAgent.get_human_input = custom_input
-# autogen.ConversableAgent._print_received_message = prompt_utils.custom_print_received_message(autogen.ConversableAgent._print_received_message)
+autogen.ConversableAgent._print_received_message = (
+    prompt_utils.custom_print_received_message(
+        autogen.ConversableAgent._print_received_message
+    )
+)
 
 coder_system_message = """
 Specialist software engineer with unparalleled proficiency with coding tasks.
@@ -182,6 +186,7 @@ def get_agents() -> Dict:
             Has the ability to access and analyze data from the internet, utilizing various websites to gather the most recent and relevant information on a given topic.
             Uses this information to provide contextually accurate and up-to-date feedback.
             Maintains a critical perspective, challenging assumptions and pushing for optimal solutions.
+            Unless there are any specific and relevant suggestions for improvement, reply with 1 word: "DONE", nothing more just "DONE" (no other follow up text please).
             """,
             # Unless there are any specific suggestions for improvement, reply with TERMINATE, nothing more just TERMINATE
         ),

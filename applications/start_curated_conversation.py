@@ -1,3 +1,4 @@
+# a group conversation between a human -> an AI agent -> AI critic
 from agents import custom_agents
 from operator import itemgetter
 from utils import prompt_utils
@@ -6,12 +7,14 @@ import autogen
 message = """
 """
 
-user_proxy, openai_coder, critic = itemgetter('user_proxy', 'openai_coder', 'critic')(
+assistant_name = prompt_utils.ask_for_prompt_with_completer()
+
+user_proxy, assistant, critic = itemgetter('user_proxy', assistant_name, 'critic')(
     custom_agents.get_agents()
 )
 
 groupchat = autogen.GroupChat(
-    agents=[user_proxy, openai_coder, critic],
+    agents=[user_proxy, assistant, critic],
     messages=[],
     speaker_selection_method="round_robin",
     max_round=20,
