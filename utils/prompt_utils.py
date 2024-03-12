@@ -7,8 +7,10 @@ from prompt_toolkit import prompt as toolkit_prompt
 from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
+from prompt_toolkit.formatted_text import HTML
 from contextlib import contextmanager
-from rich import print as rich_print
+from rich.console import Console
+from rich.text import Text
 
 
 class CustomLexer(Lexer):
@@ -41,11 +43,13 @@ def ask_for_prompt_input(
     - mouse_support=True has a side effect that actions like scroll, select text
     from the terminal require keeping the Fn key pressed.
     """
-    return toolkit_prompt(
-        prompt + "\n\n",
+    user_prompt = toolkit_prompt(
+        HTML(f'<ansigreen>\n{prompt}\n\n</ansigreen>'),
         multiline=True,
         lexer=PygmentsLexer(CustomLexer),
     )
+    print("\n", "-" * 80, flush=True, sep="")
+    return user_prompt
 
 
 def ask_for_initial_prompt_input():
@@ -59,6 +63,39 @@ def is_non_empty_prompt(prompt):
 
 def get_initial_prompt(prompt):
     return prompt if is_non_empty_prompt(prompt) else ask_for_initial_prompt_input()
+
+
+console = Console()
+
+
+def is_code_snippet(arg):
+    # Simple heuristic to determine if a string might be a code snippet
+    # This can be adjusted based on the characteristics of your code snippets
+    return '\n' in arg and ('    ' in arg or '\t' in arg)
+
+
+# Custom rich print function that should handle ANSI escape sequences correctly
+def rich_print(*args, **kwargs):
+    # Remove 'flush' argument if present, as it's not supported by rich.console.Console.print
+    kwargs.pop('flush', None)
+
+    # TODO: add better support for colorized/ better formatted output depending on output type
+    processed_args = []
+    for arg in args:
+        if isinstance(arg, str):
+            if is_code_snippet(arg):
+                # Handle potential code snippets differently
+                # For example, by not converting them with Text.from_ansi
+                # This preserves formatting but does not interpret ANSI codes
+                processed_args.append(arg)
+            else:
+                # Convert args with ANSI codes into rich Text objects
+                processed_args.append(Text.from_ansi(arg))
+        else:
+            # Non-string arguments are added without modification
+            processed_args.append(arg)
+
+    console.print(*processed_args, **kwargs)
 
 
 @contextmanager
@@ -124,11 +161,15 @@ def ask_for_prompt_with_completer(
     completer = OptionCompleter(options)
 
     selected_option = toolkit_prompt(
-        prompt, completer=completer, key_bindings=kb, complete_while_typing=True
+        HTML(f'<ansigreen>{prompt}</ansigreen>'),
+        completer=completer,
+        key_bindings=kb,
+        complete_while_typing=True,
     )
 
     # Ensure the selected option is one of the options, otherwise, print a message.
     if selected_option in options:
+        print("\n", "-" * 80, flush=True, sep="")
         return selected_option
     else:
         print(
