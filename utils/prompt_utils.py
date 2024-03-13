@@ -8,9 +8,17 @@ from prompt_toolkit.completion import Completer, Completion
 from prompt_toolkit.key_binding import KeyBindings
 from prompt_toolkit.keys import Keys
 from prompt_toolkit.formatted_text import HTML
+
 from contextlib import contextmanager
 from rich.console import Console
 from rich.text import Text
+
+from rich.progress import (
+    Progress,
+    TextColumn,
+    SpinnerColumn,
+)
+import concurrent.futures
 
 
 class CustomLexer(Lexer):
@@ -175,3 +183,30 @@ def ask_for_prompt_with_completer(
         print(
             'Invalid selection. Please run the script again and select a valid option.'
         )
+
+
+progress_bar = Progress(
+    SpinnerColumn(),
+    TextColumn("[progress.description]{task.description}"),
+    transient=True,
+)
+
+
+def execute_function_with_progress_bar(func, progress_bar_message):
+    with progress_bar as progress:
+        progress.add_task(description=progress_bar_message, total=100)
+
+        # Execute the passed function in a background thread
+        with concurrent.futures.ThreadPoolExecutor() as executor:
+            future = executor.submit(func)
+
+            # code for progress bar instead of spinner
+            # While the future is not done, update the progress bar
+            # while not future.done():
+            #     progress.update(task_id, advance=1)
+            #     sleep(0.03)  # Update the progress bar every 30ms
+            # Once the future is done, complete the progress bar
+            # progress.update(task_id, completed=100)
+
+            # Return the result of called function
+            return future.result()

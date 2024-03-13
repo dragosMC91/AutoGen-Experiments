@@ -302,3 +302,9 @@ def get_agents() -> Dict:
             """,
         ),
     }
+
+
+def get_agents_with_show_progress() -> Dict:
+    return prompt_utils.execute_function_with_progress_bar(
+        get_agents, 'Initializing agents...'
+    )
