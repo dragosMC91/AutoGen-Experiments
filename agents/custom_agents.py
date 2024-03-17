@@ -32,9 +32,11 @@ gpt3_config = get_config(
     ["gpt-3.5-turbo-0125", "gpt-3.5-turbo", "gpt-3.5-turbo-16k-1106"]
 )
 gpt4_config = get_config(["gpt-4-0125-preview"])
-mistral_medium_config = get_config(["openai/mistral-medium"])
+mistral_medium_config = get_config(["mistral/mistral-medium"])
 mistral_large_config = get_config(["mistral/mistral-large"])
-claude_3_opus = get_config(["claude-3-opus"])
+# Anthropic models don't yet work well in multi agent chats
+claude_3_opus = get_config(["anthropic/claude-3-opus"])
+claude_3_sonnet = get_config(["anthropic/claude-3-sonnet"])
 gpt4_vision_config = get_config(["gpt-4-vision-preview"])
 codellama_config = get_config(["ollama/codellama:34b"])
 
@@ -279,7 +281,8 @@ def get_agents() -> Dict:
             .endswith("TERMINATE"),
             code_execution_config={
                 "work_dir": "generated_content",
-                "use_docker": "python:3.10.13",
+                # "use_docker": "python:3.10.13",
+                "use_docker": False,
             },
             llm_config=get_llm_config(gpt3_config),
             system_message="""

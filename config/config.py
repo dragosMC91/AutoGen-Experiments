@@ -13,7 +13,12 @@ def get_llms_config():
         {"model": "dall-e-3", "api_key": os.getenv('OPENAI_API_KEY')},
         {
             "base_url": "http://localhost:30000",
-            "model": "openai/mistral-medium",
+            "model": "mistral/mistral-medium",
+            "api_key": "sk-xxxxx",
+        },
+        {
+            "base_url": "http://localhost:30000",
+            "model": "openai/gpt-4-0125-preview",
             "api_key": "sk-xxxxx",
         },
         {
@@ -23,7 +28,12 @@ def get_llms_config():
         },
         {
             "base_url": "http://localhost:30000",
-            "model": "claude-3-opus",
+            "model": "anthropic/claude-3-opus",
+            "api_key": "sk-xxxxx",
+        },
+        {
+            "base_url": "http://localhost:30000",
+            "model": "anthropic/claude-3-sonnet",
             "api_key": "sk-xxxxx",
         },
         {

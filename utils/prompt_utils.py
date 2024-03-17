@@ -128,6 +128,8 @@ def custom_print_received_message(original_method):
 # Match agent names with the ones from custom_agents.py
 AGENT_NAMES = [
     'openai_coder',
+    'anthropic_coder',
+    'mistral_coder',
     'github_actions_specialist',
     'docker_assistant',
     'advanced_assistant',

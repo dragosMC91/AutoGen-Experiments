@@ -2,21 +2,35 @@ model_list:
   - model_name: ollama/codellama
     litellm_params:
       model: "ollama/codellama"
-  - model_name: openai/mistral-medium
+  - model_name: mistral/mistral-medium
     litellm_params:
-      model: openai/mistral-medium-latest
+      model: mistral/mistral-medium-latest
       api_key: os.environ/MISTRAL_API_KEY
       api_base: https://api.mistral.ai/v1
+  - model_name: openai/gpt-4-0125-preview
+    litellm_params:
+      model: openai/gpt-4-0125-preview
+      api_key: os.environ/OPENAI_API_KEY
+      api_base: https://api.openai.com/v1
   - model_name: mistral/mistral-large
     litellm_params:
       model: mistral/mistral-large-latest
       api_key: os.environ/MISTRAL_API_KEY
       api_base: https://api.mistral.ai/v1
-  - model_name: claude-3-opus
+  - model_name: anthropic/claude-3-opus
     litellm_params:
       model: claude-3-opus-20240229
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
+      # explicit max_tokens required because a 256 default is being set otherwise
+      max_tokens: 4000
+  - model_name: anthropic/claude-3-sonnet
+    litellm_params:
+      model: claude-3-sonnet-20240229
+      api_base: https://api.anthropic.com/v1/messages
+      api_key: os.environ/ANTHROPIC_API_KEY
+      max_tokens: 4000
 litellm_settings:
   drop_params: True
   set_verbose: True
+  stream: False
