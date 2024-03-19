@@ -4,6 +4,7 @@ from setuptools import setup, find_packages
 from distutils.cmd import Command
 from pathlib import Path
 import importlib
+import os
 
 
 class CustomCommand(Command):
@@ -74,11 +75,13 @@ class StartAutogenStudioCommand(CustomCommand):
         # dynamic import is used in this case because importing dotenv
         # directly in setup.py throws an error on pip install -e .
         module = importlib.import_module('utils.file_utils')
-
+        root_dir = os.getcwd()
         # loading the secrets file is needed to gain access to the mistral api key
         # without having to expose it in the litellm config file directly
         module.load_env('.env.secrets')
-        check_call(['autogenstudio', 'ui', '--port', '8083'])
+        check_call(
+            ['autogenstudio', 'ui', '--port', '8083', '--appdir', f"{root_dir}/ui"]
+        )
 
 
 class CleanupRepo(CustomCommand):
@@ -121,7 +124,7 @@ setup(
         ),
         review=ReviewCommand,
         litellm=StartLiteLLMServerCommand,
-        autogenstudio=StartAutogenStudioCommand,
+        ui=StartAutogenStudioCommand,
         clean=CleanupRepo,
     ),
 )

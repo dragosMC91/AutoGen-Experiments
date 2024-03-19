@@ -78,6 +78,16 @@ In this context we use to extend AutoGen's capabilities to use other AI models (
 ```
 python setup.py litellm
 ```
+
+### 4. Start Autogen Studio GUI
+Autogen also offers a [neat UI](https://github.com/microsoft/autogen/tree/main/samples/apps/autogen-studio).
+
+The following command starts the AGS app and makes the ui available at http://localhost:8083.
+The AGS sqlite DB together with other related artifacts are stored in `src/ui`.
+
+```
+python setup.py ui
+```
 ## Running the Applications
 
 After setting up the environment and configuration, you can run the applications within the `src/applications/` directory.
