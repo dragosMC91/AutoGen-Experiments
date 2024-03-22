@@ -9,7 +9,7 @@ message = """
 assistant_name = prompt_utils.ask_for_prompt_with_completer()
 
 user_proxy, assistant = itemgetter('user_proxy', assistant_name)(
-    custom_agents.get_agents_with_show_progress()
+    custom_agents.get_agents()
 )
 
 # the assistant receives a message from the user, which contains the task description

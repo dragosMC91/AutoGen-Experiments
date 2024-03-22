@@ -60,7 +60,10 @@ def custom_input(self, prompt: str):
     return reply
 
 
-# override default get_human_input for more versatility
+# setup autogen overrides
+autogen.ConversableAgent.generate_oai_reply = prompt_utils.with_progress_bar(
+    description="Fetching LLM response..."
+)(autogen.ConversableAgent.generate_oai_reply)
 autogen.ConversableAgent.get_human_input = custom_input
 autogen.ConversableAgent._print_received_message = (
     prompt_utils.custom_print_received_message(
@@ -95,6 +98,7 @@ Reply 'TERMINATE' in the end when everything is done.
 """
 
 
+@prompt_utils.with_progress_bar(description='Initializing agents...')
 def get_agents() -> Dict:
     """Retrieves a dictionary of agent configurations.
 
@@ -305,9 +309,3 @@ def get_agents() -> Dict:
             """,
         ),
     }
-
-
-def get_agents_with_show_progress() -> Dict:
-    return prompt_utils.execute_function_with_progress_bar(
-        get_agents, 'Initializing agents...'
-    )

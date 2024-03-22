@@ -1,7 +1,7 @@
 model_list:
   - model_name: ollama/codellama
     litellm_params:
-      model: "ollama/codellama"
+      model: "ollama/codellama:34b"
   - model_name: mistral/mistral-medium
     litellm_params:
       model: mistral/mistral-medium-latest

@@ -18,7 +18,6 @@ from rich.progress import (
     TextColumn,
     SpinnerColumn,
 )
-import concurrent.futures
 
 
 class CustomLexer(Lexer):
@@ -135,6 +134,7 @@ AGENT_NAMES = [
     'advanced_assistant',
     'basic_assistant',
     'prompt_engineer',
+    'codellama_coder',
 ]
 
 
@@ -194,21 +194,16 @@ progress_bar = Progress(
 )
 
 
-def execute_function_with_progress_bar(func, progress_bar_message):
-    with progress_bar as progress:
-        progress.add_task(description=progress_bar_message, total=100)
+# 1 additional layer of inner functions is used to be able to pass a 'description' to the decorator
+def with_progress_bar(description):
+    def wrap_function(target_function):
+        def wrapped_function(*args, **kwargs):
+            with progress_bar as progress:
+                task_id = progress.add_task(description=description, total=100)
+                result = target_function(*args, **kwargs)
+                progress.remove_task(task_id)
+                return result
 
-        # Execute the passed function in a background thread
-        with concurrent.futures.ThreadPoolExecutor() as executor:
-            future = executor.submit(func)
+        return wrapped_function
 
-            # code for progress bar instead of spinner
-            # While the future is not done, update the progress bar
-            # while not future.done():
-            #     progress.update(task_id, advance=1)
-            #     sleep(0.03)  # Update the progress bar every 30ms
-            # Once the future is done, complete the progress bar
-            # progress.update(task_id, completed=100)
-
-            # Return the result of called function
-            return future.result()
+    return wrap_function
