@@ -3,7 +3,7 @@ from operator import itemgetter
 import autogen
 from utils import prompt_utils
 
-multiline_message = """
+message = """
 I want to make vegan lasagna in my tefal pressure cooker. How can i do it ?
 """
 
@@ -21,5 +21,5 @@ manager = autogen.GroupChatManager(
 
 user_proxy.initiate_chat(
     manager,
-    message=prompt_utils.get_initial_prompt(multiline_message),
+    message=prompt_utils.get_initial_prompt(message),
 )

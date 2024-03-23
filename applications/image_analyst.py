@@ -2,7 +2,7 @@ from agents import custom_agents
 from operator import itemgetter
 from utils import prompt_utils
 
-multiline_message = """
+message = """
 write 2 test cases for the section of the bayut.com website in the following image:
 <img /Users/dragoscampean/Desktop/bayut.jpg>
 """
@@ -17,7 +17,7 @@ user_proxy.initiate_chat(
     message=f"""
     Analyze this image:
     ```````````````````````````
-    <img {prompt_utils.get_initial_prompt(multiline_message)}>
+    <img {prompt_utils.get_initial_prompt(message)}>
     ```````````````````````````
     """,
 )

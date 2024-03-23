@@ -1,3 +1,8 @@
+This project is a small wrapper over [AutoGen](https://github.com/microsoft/autogen). It integrates the [LiteLLM](https://github.com/BerriAI/litellm) proxy server to give you easy access to any LLM (proprietary or open source), without having to leave the comfort of your terminal.
+
+It uses the [Rich](https://github.com/Textualize/rich) library to colorize output which makes reading large responses in a plain terminal a bit more digestible:
+![Example Terminal Output](docs/llm_terminal_response.jpg)
+
 ## Getting Started
 
 This section provides instructions on how to set up your development environment for working on this project.
@@ -95,7 +100,15 @@ After setting up the environment and configuration, you can run the applications
 
 ## Applications
 Executing an application creates a new conversation session based on the flow defined in that app.
-You can either tweak the `multiline_message` inside each application, or execute the script and input your prompt in the command line (recommended).
+
+There are 2 generic apps:
+1. `start_conversation.py` starts a simple conversation a selected agent from a list of predefined specialized agents.
+2. `start_curated_conversation.py` adds a critic AI to the conversation which reviews the main agent's claims
+
+New custom agents can be added in the agent definition file `agents/custom_agents.py`.
+
+
+You can either tweak the `message` inside each application, or execute the script and input your prompt in the command line (recommended).
 Prompts have multiline support so `Enter` just inserts a new line. In order to submit the prompt press `(Meta|Esc)+Enter`.
 
 ### chef.py
