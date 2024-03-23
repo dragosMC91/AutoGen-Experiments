@@ -28,10 +28,8 @@ def get_config(models: list[str]):
     )
 
 
-gpt3_config = get_config(
-    ["gpt-3.5-turbo-0125", "gpt-3.5-turbo", "gpt-3.5-turbo-16k-1106"]
-)
-gpt4_config = get_config(["gpt-4-0125-preview"])
+gpt3_config = get_config(["gpt-3.5-turbo-0125", "gpt-3.5-turbo"])
+gpt4_config = get_config(["gpt-4-0125-preview", "gpt-4-turbo-preview"])
 mistral_medium_config = get_config(["mistral/mistral-medium"])
 mistral_large_config = get_config(["mistral/mistral-large"])
 # Anthropic models don't yet work well in multi agent chats

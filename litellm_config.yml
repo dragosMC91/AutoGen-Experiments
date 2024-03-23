@@ -12,6 +12,21 @@ model_list:
       model: openai/gpt-4-0125-preview
       api_key: os.environ/OPENAI_API_KEY
       api_base: https://api.openai.com/v1
+  - model_name: openai/gpt-4-turbo-preview
+    litellm_params:
+      model: openai/gpt-4-turbo-preview
+      api_key: os.environ/OPENAI_API_KEY
+      api_base: https://api.openai.com/v1
+  - model_name: openai/gpt-3.5-turbo-0125
+    litellm_params:
+      model: openai/gpt-3.5-turbo-0125
+      api_key: os.environ/OPENAI_API_KEY
+      api_base: https://api.openai.com/v1
+  - model_name: openai/gpt-3.5-turbo
+    litellm_params:
+      model: openai/gpt-3.5-turbo
+      api_key: os.environ/OPENAI_API_KEY
+      api_base: https://api.openai.com/v1
   - model_name: mistral/mistral-large
     litellm_params:
       model: mistral/mistral-large-latest
@@ -34,3 +49,7 @@ litellm_settings:
   drop_params: True
   set_verbose: True
   stream: False
+general_settings: 
+  database_url: os.environ/DATABASE_URL
+  database_connection_pool_limit: 100
+  database_connection_timeout: 60

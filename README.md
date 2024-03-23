@@ -1,6 +1,10 @@
 This project is a small wrapper over [AutoGen](https://github.com/microsoft/autogen). It integrates the [LiteLLM](https://github.com/BerriAI/litellm) proxy server to give you easy access to any LLM (proprietary or open source), without having to leave the comfort of your terminal.
 
-It uses the [Rich](https://github.com/Textualize/rich) library to colorize output which makes reading large responses in a plain terminal a bit more digestible:
+It uses the [Rich](https://github.com/Textualize/rich) and [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) libraries to colorize inputs/ outputs which makes reading large responses in a plain terminal a bit more digestible:
+
+Input:
+![Example Terminal Output](docs/llm_terminal_input.jpg)
+Output
 ![Example Terminal Output](docs/llm_terminal_response.jpg)
 
 ## Getting Started
@@ -43,13 +47,18 @@ Replace `myenv` with a name of your choice for the environment.
 Once you have the correct version of Python set up, install the project dependencies by running:
 
 ```sh
-pip install -r requirements.txt
+pip install -e .
+```
+
+If you also plan to setup and use the the litellm proxy dashboard UI, which offers neat costs monitoring and usage statistics, install the extra dependencies via:
+```sh
+pip install -e '.[proxy]'
 ```
 
 ## Configuration
 
 ### 1. Define the LLMs config
-Copy the `.env.secrets.example` file to create your own `.env.secrets` file and fill in your specific API keys for services you plan you use like OpenAI or MistralAI.
+Copy the `.env.secrets.example` file to create your own `.env.secrets` file and fill in your specific API keys for services you plan you use like OpenAI, MistralAI, Anthropic models or others.
 
 ```sh
 cp .env.secrets.example .env.secrets
@@ -57,13 +66,16 @@ cp .env.secrets.example .env.secrets
 
 Edit the `.env.secrets` file with your preferred text editor and update the API keys as needed.
 
-### 2. Run setuptools
-Run the following command in the project root to facilitate packages imports throughout the repo.
-```
-pip install -e .
+### 2. Configure the proxy server UI
+First you need to setup a postgres DB to store usage information from litellm. The easiest way to do this is to create a free [Superbase](https://supabase.com/) postgres instance hosted with AWS.
+
+Once the DB is ready to use, make sure you can connect o it
+
+```sh
+psql postgresql://<user>:<password>@<host>:<port>/<dbname>
 ```
 
-This will allow you to import and use the project's modules from anywhere on your system.
+If connection is successful, just set the `DATABASE_URL` env var in your `.env.secrets` file and you're ready to go. The next time you will start the litellm server, it will automatically connect to the DB.
 
 With these steps, you should be ready to work on the project and run the applications.
 
@@ -84,7 +96,7 @@ In this context we use to extend AutoGen's capabilities to use other AI models (
 python setup.py litellm
 ```
 
-### 4. Start Autogen Studio GUI
+### 4. Start Autogen Studio GUI (terminal usage recommended instead of ui)
 Autogen also offers a [neat UI](https://github.com/microsoft/autogen/tree/main/samples/apps/autogen-studio).
 
 The following command starts the AGS app and makes the ui available at http://localhost:8083.
@@ -93,6 +105,20 @@ The AGS sqlite DB together with other related artifacts are stored in `src/ui`.
 ```
 python setup.py ui
 ```
+
+### 5. Monitor costs and view usage
+By default, OpenAI model requests are not routed through litellm. This is because, if you're only using this LLM provider, it does not make sense to add an extra layer because you can easily monitor costs in https://platform.openai.com/usage.
+However, if you use multiple LLM providers, it makes sense to have all data aggregated within a single dashboard -> `LiteLLM UI`.
+
+Steps:
+1. Set OpenAI requests to be routed through litellm. To do this, simply add the `openai/` prefix before the `GPT-x` name in `agents/custom_agents.py` for example the config for GPT4 will be
+```
+gpt4_config = get_config(["openai/gpt-4-0125-preview", "openai/gpt-4-turbo-preview"])
+```
+2. Start the litellm server -> make sure to go over step [2. Configure the proxy server UI](#2-configure-the-proxy-server-ui).
+3. Inspect http://localhost:30000/ui
+![LLM Spend](docs/llm_costs_dashboard.jpg)
+
 ## Running the Applications
 
 After setting up the environment and configuration, you can run the applications within the `src/applications/` directory.
