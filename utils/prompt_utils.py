@@ -68,7 +68,7 @@ def is_non_empty_prompt(prompt):
     return not bool(re.match(pattern, prompt))
 
 
-def get_initial_prompt(prompt):
+def get_initial_prompt(prompt=""):
     return prompt if is_non_empty_prompt(prompt) else ask_for_initial_prompt_input()
 
 

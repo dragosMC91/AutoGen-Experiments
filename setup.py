@@ -166,7 +166,7 @@ setup(
         'pip-tools==7.3.0',
         'platformdirs==3.11.0',
         'prompt-toolkit==3.0.43',
-        'pyautogen==0.2.19',
+        'pyautogen==0.2.20',
         'pycodestyle==2.11.1',
         'pycparser==2.21',
         'pydantic==2.5.1',

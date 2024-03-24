@@ -37,6 +37,11 @@ def get_llms_config():
         },
         {
             "base_url": "http://localhost:30000",
+            "model": "openai/dall-e-3",
+            "api_key": "sk-xxxxx",
+        },
+        {
+            "base_url": "http://localhost:30000",
             "model": "mistral/mistral-large",
             "api_key": "sk-xxxxx",
         },
@@ -55,7 +60,6 @@ def get_llms_config():
             "model": "ollama/codellama:34b",
             "api_key": "sk-xxxxx",
         },
-        {"model": "DALLE 2", "api_key": os.getenv('OPENAI_API_KEY')},
     ]
 
     for model_info in config:
