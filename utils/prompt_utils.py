@@ -102,7 +102,7 @@ def rich_print(*args, **kwargs):
             # Non-string arguments are added without modification
             processed_args.append(arg)
 
-    console.print(*processed_args, **kwargs)
+    console.print(markup=False, *processed_args, **kwargs)
 
 
 @contextmanager
