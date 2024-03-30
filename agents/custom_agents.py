@@ -8,6 +8,7 @@ from typing import Dict
 from utils import file_utils
 from config import config
 from utils import prompt_utils
+from utils import requests
 
 DEFAULT_FILE_LOCATION = '.'
 DEFAULT_REQUEST_TIMEOUT = 300
@@ -28,14 +29,25 @@ def get_config(models: list[str]):
     )
 
 
-gpt3_config = get_config(["gpt-3.5-turbo-0125", "gpt-3.5-turbo"])
-gpt4_config = get_config(["gpt-4-0125-preview", "gpt-4-turbo-preview"])
+# if LiteLLM server is started, route all traffic through that proxy server
+openai_model_prefix = 'openai/' if requests.is_litellm_server_running() else ''
+
+gpt3_config = get_config(
+    [f"{openai_model_prefix}gpt-3.5-turbo-0125", f"{openai_model_prefix}gpt-3.5-turbo"]
+)
+gpt4_config = get_config(
+    [
+        f"{openai_model_prefix}gpt-4-0125-preview",
+        f"{openai_model_prefix}gpt-4-turbo-preview",
+    ]
+)
 dalle_config = get_config(["dall-e-3"])
 mistral_medium_config = get_config(["mistral/mistral-medium"])
 mistral_large_config = get_config(["mistral/mistral-large"])
 # Anthropic models don't yet work well in multi agent chats
 claude_3_opus = get_config(["anthropic/claude-3-opus"])
 claude_3_sonnet = get_config(["anthropic/claude-3-sonnet"])
+claude_3_haiku = get_config(["anthropic/claude-3-haiku"])
 gpt4_vision_config = get_config(["gpt-4-vision-preview"])
 codellama_config = get_config(["ollama/codellama:34b"])
 
@@ -216,7 +228,7 @@ def get_agents() -> Dict:
         ),
         "anthropic_coder": autogen.AssistantAgent(
             name="anthropic_coder",
-            llm_config=get_llm_config(claude_3_opus),
+            llm_config=get_llm_config(claude_3_haiku),
             system_message=coder_system_message,
         ),
         "mistral_coder": autogen.AssistantAgent(
