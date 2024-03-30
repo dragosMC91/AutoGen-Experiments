@@ -1,6 +1,8 @@
 import os
 import logging
 
+base_url = "http://localhost:30000"
+
 
 def get_llms_config():
     config = [
@@ -11,54 +13,59 @@ def get_llms_config():
         {"model": "gpt-4-vision-preview", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "dall-e-3", "api_key": os.getenv('OPENAI_API_KEY')},
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
             "model": "mistral/mistral-medium",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
             "model": "openai/gpt-4-0125-preview",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
             "model": "openai/gpt-4-turbo-preview",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
             "model": "openai/gpt-3.5-turbo-0125",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
             "model": "openai/gpt-3.5-turbo",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
             "model": "openai/dall-e-3",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
             "model": "mistral/mistral-large",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
             "model": "anthropic/claude-3-opus",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
             "model": "anthropic/claude-3-sonnet",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
-            "base_url": "http://localhost:30000",
+            "base_url": base_url,
+            "model": "anthropic/claude-3-haiku",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+        },
+        {
+            "base_url": base_url,
             "model": "ollama/codellama:34b",
-            "api_key": "sk-xxxxx",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
     ]
 
