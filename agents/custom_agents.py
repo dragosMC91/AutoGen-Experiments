@@ -65,22 +65,11 @@ def get_llm_config(specific_config, custom_config=None):
     return default_config
 
 
-def custom_input(self, prompt: str):
-    reply = prompt_utils.ask_for_prompt_input(prompt=prompt)
-    self._human_input.append(reply)
-    return reply
-
-
 # setup autogen overrides
 autogen.ConversableAgent.generate_oai_reply = prompt_utils.with_progress_bar(
     description="Fetching LLM response..."
 )(autogen.ConversableAgent.generate_oai_reply)
-autogen.ConversableAgent.get_human_input = custom_input
-autogen.ConversableAgent._print_received_message = (
-    prompt_utils.custom_print_received_message(
-        autogen.ConversableAgent._print_received_message
-    )
-)
+prompt_utils.set_custom_IO_overrides()
 
 coder_system_message = """
 <prompt_explanation>
@@ -173,7 +162,7 @@ def get_agents() -> Dict:
         ),
         "advanced_assistant": autogen.AssistantAgent(
             name="advanced_assistant",
-            llm_config=get_llm_config(gpt4_config),
+            llm_config=get_llm_config(claude_3_opus),
             system_message="""
             An advanced helper. You are expected to assist with complex tasks, which may include deep analysis,
             generating sophisticated ideas, solving intricate problems, and more.
@@ -218,6 +207,7 @@ def get_agents() -> Dict:
             considerations, or potential pitfalls. If a query falls outside your current knowledge base or
             if additional context from my end could lead to a more accurate response, kindly indicate so.```
 
+            Other attributions:
             Analyzing and interpreting prompts provided by users.
             Refining and optimizing these prompts to ensure that the LLM receives clear, unambiguous instructions, thereby maximizing the quality of the output.
             Generating suggestions on how to 'prime' or prepare the LLM's context before providing a prompt.

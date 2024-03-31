@@ -1,6 +1,7 @@
 import re
 import builtins
 from pygments.lexers import guess_lexer
+from pygments.lexers.python import PythonLexer
 from pygments.lexer import Lexer
 from prompt_toolkit.lexers import PygmentsLexer
 from prompt_toolkit import prompt as toolkit_prompt
@@ -18,6 +19,9 @@ from rich.progress import (
     TextColumn,
     SpinnerColumn,
 )
+
+from autogen.io.base import IOStream
+from typing import Any
 
 
 class CustomLexer(Lexer):
@@ -41,7 +45,7 @@ class OptionCompleter(Completer):
 
 
 def ask_for_prompt_input(
-    prompt='Input user prompt. Submit prompt via (Meta|Esc)+Enter.',
+    prompt='Please input user prompt.',
 ):
     """
     Prompts the user for a multiline string.
@@ -50,10 +54,11 @@ def ask_for_prompt_input(
     - mouse_support=True has a side effect that actions like scroll, select text
     from the terminal require keeping the Fn key pressed.
     """
+    prompt_suffix = 'Submit prompt via (Meta|Esc)+Enter.'
     user_prompt = toolkit_prompt(
-        HTML(f'<ansigreen>\n{prompt}\n\n</ansigreen>'),
+        HTML(f'<ansigreen>\n{prompt}\n{prompt_suffix}\n\n</ansigreen>'),
         multiline=True,
-        lexer=PygmentsLexer(CustomLexer),
+        lexer=PygmentsLexer(PythonLexer),
     )
     print("\n", "-" * 80, flush=True, sep="")
     return user_prompt
@@ -79,6 +84,41 @@ def is_code_snippet(arg):
     # Simple heuristic to determine if a string might be a code snippet
     # This can be adjusted based on the characteristics of your code snippets
     return '\n' in arg and ('    ' in arg or '\t' in arg)
+
+
+class RichIOStream(IOStream):
+    def __init__(self):
+        self.console = Console()
+
+    def print(self, *args: Any, **kwargs) -> None:
+        # Remove 'flush' argument if present, as it's not supported by rich.console.Console.print
+        kwargs.pop('flush', None)
+        processed_args = []
+        for arg in args:
+            if isinstance(arg, str):
+                if is_code_snippet(arg):
+                    # Handle potential code snippets differently
+                    # For example, by not converting them with Text.from_ansi
+                    # This preserves formatting but does not interpret ANSI codes
+                    processed_args.append(arg)
+                else:
+                    # Convert args with ANSI codes into rich Text objects
+                    processed_args.append(Text.from_ansi(arg))
+            else:
+                # Non-string arguments are added without modification
+                processed_args.append(arg)
+
+        self.console.print(markup=False, *processed_args, **kwargs)
+
+    def input(self, prompt: str = "", *, password: bool = False) -> str:
+        return ask_for_prompt_input(prompt)
+
+
+default_rich_io_stream = RichIOStream()
+
+
+def set_custom_IO_overrides():
+    IOStream.set_global_default(default_rich_io_stream)
 
 
 # Custom rich print function that should handle ANSI escape sequences correctly
