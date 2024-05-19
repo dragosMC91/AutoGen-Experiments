@@ -7,9 +7,14 @@ model_list:
       model: mistral/mistral-medium-latest
       api_key: os.environ/MISTRAL_API_KEY
       api_base: https://api.mistral.ai/v1
-  - model_name: openai/gpt-4-0125-preview
+  - model_name: openai/gpt-4-turbo-2024-04-09
     litellm_params:
-      model: openai/gpt-4-0125-preview
+      model: openai/gpt-4-turbo-2024-04-09
+      api_key: os.environ/OPENAI_API_KEY
+      api_base: https://api.openai.com/v1
+  - model_name: openai/gpt-4o
+    litellm_params:
+      model: openai/gpt-4o
       api_key: os.environ/OPENAI_API_KEY
       api_base: https://api.openai.com/v1
   - model_name: openai/gpt-4-turbo-preview

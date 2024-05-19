@@ -1,3 +1,24 @@
+1. [Getting Started](#getting-started)
+2. [Prerequisites](#prerequisites)
+3. [Python Version](#python-version)
+4. [Environment Setup](#environment-setup)
+    1. [Using pyenv](#using-pyenv)
+    2. [Using conda](#using-conda)
+    3. [Install project dependencies](#install-project-dependencies)
+5. [Configuration](#configuration)
+    1. [Define the LLMs config](#1-define-the-llms-config)
+    2. [Configure the proxy server UI](#2-configure-the-proxy-server-ui)
+6. [Useful tools](#useful-tools)
+    1. [Lint code](#1-lint-code)
+    2. [Review code from file using gpt4](#2-review-code-from-file-using-gpt4)
+    3. [Start the LiteLLM proxy server](#3-start-the-litellm-proxy-server)
+    4. [Start Autogen Studio GUI (terminal usage recommended instead of ui)](#4-start-autogen-studio-gui-terminal-usage-recommended-instead-of-ui)
+    5. [Monitor costs and view usage](#5-monitor-costs-and-view-usage)
+7. [Running the Applications](#running-the-applications)
+    1. [Start conversation](#1-start-conversation)
+    2. [Ask Chef](#2-ask-ai-chef)
+9. [Setup local and third party LLMs](#setup-local-and-third-party-llms)
+
 This project is a small wrapper over [AutoGen](https://github.com/microsoft/autogen). It integrates the [LiteLLM](https://github.com/BerriAI/litellm) proxy server to give you easy access to any LLM (proprietary or open source), without having to leave the comfort of your terminal.
 
 It uses the [Rich](https://github.com/Textualize/rich) and [prompt_toolkit](https://github.com/prompt-toolkit/python-prompt-toolkit) libraries to colorize inputs/ outputs which makes reading large responses in a plain terminal a bit more digestible:
@@ -110,13 +131,11 @@ python setup.py ui
 By default, OpenAI model requests are not routed through litellm. This is because, if you're only using this LLM provider, it does not make sense to add an extra layer because you can easily monitor costs in https://platform.openai.com/usage.
 However, if you use multiple LLM providers, it makes sense to have all data aggregated within a single dashboard -> `LiteLLM UI`.
 
+If the LiteLLM proxy server is up and running, then all openai requests will automatically be routed through the proxy.
+
 Steps:
-1. Set OpenAI requests to be routed through litellm. To do this, simply add the `openai/` prefix before the `GPT-x` name in `agents/custom_agents.py` for example the config for GPT4 will be
-```
-gpt4_config = get_config(["openai/gpt-4-0125-preview", "openai/gpt-4-turbo-preview"])
-```
-2. Start the litellm server -> make sure to go over step [2. Configure the proxy server UI](#2-configure-the-proxy-server-ui).
-3. Inspect http://localhost:30000/ui
+1. Start the litellm server -> make sure to go over step [2. Configure the proxy server UI](#2-configure-the-proxy-server-ui).
+2. Inspect http://localhost:30000/ui
 ![LLM Spend](docs/llm_costs_dashboard.jpg)
 
 ## Running the Applications
@@ -124,10 +143,11 @@ gpt4_config = get_config(["openai/gpt-4-0125-preview", "openai/gpt-4-turbo-previ
 After setting up the environment and configuration, you can run the applications within the `src/applications/` directory.
 
 
-## Applications
 Executing an application creates a new conversation session based on the flow defined in that app.
 
-There are 2 generic apps:
+### 1. Start conversation
+
+There are 2 generic conversation apps:
 1. `start_conversation.py` starts a simple conversation a selected agent from a list of predefined specialized agents.
 2. `start_curated_conversation.py` adds a critic AI to the conversation which reviews the main agent's claims
 
@@ -137,7 +157,7 @@ New custom agents can be added in the agent definition file `agents/custom_agent
 You can either tweak the `message` inside each application, or execute the script and input your prompt in the command line (recommended).
 Prompts have multiline support so `Enter` just inserts a new line. In order to submit the prompt press `(Meta|Esc)+Enter`.
 
-### chef.py
+### 2. Ask AI chef
 ```
 python chef.py
 ```

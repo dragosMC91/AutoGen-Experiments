@@ -4,7 +4,6 @@ import autogen
 from utils import prompt_utils
 
 message = """
-I want to make vegan lasagna in my tefal pressure cooker. How can i do it ?
 """
 
 user_proxy, nutritionist, master_chef = itemgetter(

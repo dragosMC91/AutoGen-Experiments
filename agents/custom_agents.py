@@ -35,10 +35,14 @@ openai_model_prefix = 'openai/' if requests.is_litellm_server_running() else ''
 gpt3_config = get_config(
     [f"{openai_model_prefix}gpt-3.5-turbo-0125", f"{openai_model_prefix}gpt-3.5-turbo"]
 )
-gpt4_config = get_config(
+gpt4_turbo_config = get_config(
     [
-        f"{openai_model_prefix}gpt-4-0125-preview",
-        f"{openai_model_prefix}gpt-4-turbo-preview",
+        f"{openai_model_prefix}gpt-4-turbo-2024-04-09",
+    ]
+)
+gpt4_o_config = get_config(
+    [
+        f"{openai_model_prefix}gpt-4o",
     ]
 )
 dalle_config = get_config(["dall-e-3"])
@@ -162,7 +166,7 @@ def get_agents() -> Dict:
         ),
         "advanced_assistant": autogen.AssistantAgent(
             name="advanced_assistant",
-            llm_config=get_llm_config(claude_3_opus),
+            llm_config=get_llm_config(gpt4_o_config),
             system_message="""
             An advanced helper. You are expected to assist with complex tasks, which may include deep analysis,
             generating sophisticated ideas, solving intricate problems, and more.
@@ -172,7 +176,7 @@ def get_agents() -> Dict:
         ),
         "nutritionist": autogen.AssistantAgent(
             name="nutritionist",
-            llm_config=get_llm_config(gpt3_config),
+            llm_config=get_llm_config(gpt4_o_config),
             system_message="""
             You are a vegan dietician/nutritionist. Your task is to analyze the macronutrients (proteins, fats, and carbohydrates)
             of each dish presented to you. Based on your analysis, you will suggest complementary vegan foods that the individual
@@ -182,7 +186,7 @@ def get_agents() -> Dict:
         ),
         "prompt_engineer": autogen.AssistantAgent(
             name="prompt_engineer",
-            llm_config=get_llm_config(gpt4_config, {"temperature": 0.3}),
+            llm_config=get_llm_config(gpt4_turbo_config, {"temperature": 0.3}),
             system_message="""
             An agent specialized for writing prompts
             A specialized and highly prolific prompt engineer with detailed knowledge on how various LLMs work.
@@ -217,7 +221,7 @@ def get_agents() -> Dict:
         ),
         "master_chef": autogen.AssistantAgent(
             name="master_chef",
-            llm_config=get_llm_config(gpt3_config),
+            llm_config=get_llm_config(gpt4_o_config),
             system_message="""
             A highly skilled and creative vegan chef with extensive knowledge of plant-based ingredients and cuisines from around the world.
             This chef is adept at creating nutritious, flavorful, and visually appealing vegan dishes,
@@ -254,12 +258,12 @@ def get_agents() -> Dict:
         ),
         "openai_coder": autogen.AssistantAgent(
             name="openai_expert_coder",
-            llm_config=get_llm_config(gpt4_config),
+            llm_config=get_llm_config(gpt4_o_config),
             system_message=coder_system_message,
         ),
         "anthropic_coder": autogen.AssistantAgent(
             name="anthropic_coder",
-            llm_config=get_llm_config(claude_3_haiku),
+            llm_config=get_llm_config(claude_3_opus),
             system_message=coder_system_message,
         ),
         "mistral_coder": autogen.AssistantAgent(
@@ -274,7 +278,7 @@ def get_agents() -> Dict:
         ),
         "github_actions_specialist": autogen.AssistantAgent(
             name="github_actions_specialist",
-            llm_config=get_llm_config(gpt4_config, {"temperature": 0.1}),
+            llm_config=get_llm_config(gpt4_turbo_config, {"temperature": 0.1}),
             system_message="""
             I am working with GitHub Actions, a powerful automation tool that enables developers to
             automate workflows directly from their GitHub repositories.
@@ -291,7 +295,7 @@ def get_agents() -> Dict:
         ),
         "docker_assistant": autogen.AssistantAgent(
             name="docker_assistant",
-            llm_config=get_llm_config(gpt4_config, {"temperature": 0.1}),
+            llm_config=get_llm_config(gpt4_turbo_config, {"temperature": 0.1}),
             system_message="""
             Docker assistant who knows everything about docker
             I am currently focusing on Docker, a powerful platform that enables developers to build, share,
