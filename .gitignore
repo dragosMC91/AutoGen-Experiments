@@ -1,8 +1,9 @@
-ui
-dalle_art
-.venv
 .cache
-output
+.env.secrets
+.venv
 __pycache__
 *egg-info
-.env.secrets
+build
+dalle_art
+output
+ui
