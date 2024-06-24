@@ -65,6 +65,11 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
+            "model": "anthropic/claude-3.5-sonnet",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+        },
+        {
+            "base_url": base_url,
             "model": "anthropic/claude-3-haiku",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
