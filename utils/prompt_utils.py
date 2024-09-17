@@ -181,6 +181,7 @@ AGENT_NAMES = [
 def ask_for_prompt_with_completer(
     prompt='Select AI (press Tab for options): ',
     options=AGENT_NAMES,
+    selection_mandatory=True,
 ):
     """Prompts the user to select an option with autocompletion support.
 
@@ -217,13 +218,15 @@ def ask_for_prompt_with_completer(
         complete_while_typing=True,
     )
 
-    # Ensure the selected option is one of the options, otherwise, print a message.
-    if selected_option in options:
+    # Ensure the selected option is one of the options, or users skipped
+    # selecting an option, otherwise, print a warning message.
+    is_input_skipped = not selection_mandatory and selected_option == ''
+    if selected_option in options or is_input_skipped:
         print("\n", "-" * 80, flush=True, sep="")
         return selected_option
     else:
         print(
-            'Invalid selection. Please run the script again and select a valid option.'
+            f'Invalid selection "{selected_option}". Please run the script again and select a valid option from {options}.'
         )
 
 

@@ -1,21 +1,20 @@
 from agents import custom_agents
-from operator import itemgetter
 import autogen
 from utils import prompt_utils
 
 message = """
 """
 
-user_proxy, nutritionist, master_chef = itemgetter(
-    'user_proxy', 'nutritionist', 'master_chef'
-)(custom_agents.get_agents())
+nutritionist, user_proxy, master_chef = custom_agents.get_agents(
+    names=['nutritionist', 'user_proxy', 'master_chef']
+)
 
 groupchat = autogen.GroupChat(
     agents=[user_proxy, nutritionist, master_chef], messages=[], max_round=10
 )
 manager = autogen.GroupChatManager(
     groupchat=groupchat,
-    llm_config=custom_agents.get_llm_config(custom_agents.gpt3_config),
+    llm_config=custom_agents.get_llm_config(custom_agents.Configs.gpt3_config),
 )
 
 user_proxy.initiate_chat(

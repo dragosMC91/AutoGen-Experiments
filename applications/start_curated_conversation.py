@@ -1,17 +1,18 @@
 # a group conversation between a human -> an AI agent -> AI critic
 from agents import custom_agents
-from operator import itemgetter
 from utils import prompt_utils
 import autogen
 
 message = """
 """
 
-assistant_name = prompt_utils.ask_for_prompt_with_completer()
-
-user_proxy, assistant, critic = itemgetter('user_proxy', assistant_name, 'critic')(
-    custom_agents.get_agents()
+assistant_name = prompt_utils.ask_for_prompt_with_completer(
+    options=custom_agents.get_agents_options()
 )
+
+assistant, user_proxy, critic = custom_agents.get_agents(
+    names=[assistant_name, 'user_proxy', 'critic']
+).values()
 
 groupchat = autogen.GroupChat(
     agents=[user_proxy, assistant, critic],
@@ -22,7 +23,7 @@ groupchat = autogen.GroupChat(
 
 manager = autogen.GroupChatManager(
     groupchat=groupchat,
-    llm_config=custom_agents.get_llm_config(custom_agents.gpt3_config),
+    llm_config=custom_agents.get_llm_config(custom_agents.Configs.gpt3_config),
     code_execution_config=False,
     system_message="""
     Manage the chat between the the coder and the critic.

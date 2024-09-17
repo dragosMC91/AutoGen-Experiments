@@ -1,5 +1,4 @@
 from agents import custom_agents
-from operator import itemgetter
 from utils import prompt_utils
 from autogen.agentchat.contrib.capabilities import generate_images
 import os
@@ -8,7 +7,7 @@ import time
 message = """
 """
 
-image_generator = itemgetter('image_generator')(custom_agents.get_agents())
+image_generator = custom_agents.get_agents(names=['image_generator'])["image_generator"]
 
 resolution = prompt_utils.ask_for_prompt_with_completer(
     prompt='Select Resolution (press Tab for options): ',

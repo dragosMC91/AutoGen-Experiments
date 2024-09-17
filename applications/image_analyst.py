@@ -1,5 +1,4 @@
 from agents import custom_agents
-from operator import itemgetter
 from utils import prompt_utils
 
 message = """
@@ -7,9 +6,9 @@ write 2 test cases for the section of the bayut.com website in the following ima
 <img /Users/dragoscampean/Desktop/bayut.jpg>
 """
 
-user_proxy, image_analyst = itemgetter('user_proxy', 'image_analyst')(
-    custom_agents.get_agents()
-)
+user_proxy, image_analyst = custom_agents.get_agents(
+    names=['user_proxy', 'image_analyst']
+).values()
 
 # the assistant receives a message from the user, which contains the task description
 user_proxy.initiate_chat(
