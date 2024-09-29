@@ -10,8 +10,10 @@ def get_llms_config():
         {"model": "gpt-3.5-turbo", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o1-preview", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4-turbo-2024-04-09", "api_key": os.getenv('OPENAI_API_KEY')},
-        {"model": "gpt-4o", "api_key": os.getenv('OPENAI_API_KEY')},
-        # {"model": "gpt-4o-2024-08-06", "api_key": os.getenv('OPENAI_API_KEY')},
+        # {"model": "gpt-4o", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "gpt-4o-2024-08-06", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "o1-mini", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "o1-preview", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4-vision-preview", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "dall-e-3", "api_key": os.getenv('OPENAI_API_KEY')},
         {
@@ -31,8 +33,14 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
-            # "model": "openai/gpt-4o-2024-08-06",
-            "model": "openai/gpt-4o",
+            "model": "openai/gpt-4o-2024-08-06",
+            # "model": "openai/gpt-4o",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.0025, 0.010],
+        },
+        {
+            "base_url": base_url,
+            "model": "openai/o1-mini",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
         {
@@ -59,21 +67,25 @@ def get_llms_config():
             "base_url": base_url,
             "model": "anthropic/claude-3-opus",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.015, 0.075],
         },
         {
             "base_url": base_url,
             "model": "anthropic/claude-3-sonnet",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.003, 0.015],
         },
         {
             "base_url": base_url,
             "model": "anthropic/claude-3.5-sonnet",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.003, 0.015],
         },
         {
             "base_url": base_url,
             "model": "anthropic/claude-3-haiku",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00025, 0.00125],
         },
         {
             "base_url": base_url,

@@ -35,8 +35,9 @@ class Configs:
     claude_35_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3.5-sonnet"])
     gpt4_o_config: List[Dict[str, Any]] = get_config(
         [
-            f"{openai_model_prefix}gpt-4o",
-            # f"{openai_model_prefix}gpt-4o-2024-08-06",
+            # gpt-4o-2024-08-06 is 2x times cheaper than gpt-4o
+            # f"{openai_model_prefix}gpt-4o",
+            f"{openai_model_prefix}gpt-4o-2024-08-06",
         ]
     )
     gpt4_turbo_config: List[Dict[str, Any]] = get_config(
@@ -44,6 +45,16 @@ class Configs:
             f"{openai_model_prefix}gpt-4-turbo-2024-04-09",
         ]
     )
+    # gpt4_o1_config: List[Dict[str, Any]] = get_config(
+    #     [
+    #         f"{openai_model_prefix}o1-preview",
+    #     ]
+    # )
+    # gpt4_o1_mini_config: List[Dict[str, Any]] = get_config(
+    #     [
+    #         f"{openai_model_prefix}o1-mini",
+    #     ]
+    # )
     # Anthropic models don't yet work well in multi agent chats
     claude_3_opus: List[Dict[str, Any]] = get_config(["anthropic/claude-3-opus"])
     claude_3_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3-sonnet"])
@@ -165,14 +176,14 @@ class Agents(TypedDict):
     """
 
     coder: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
-        name="openai_expert_coder",
+        name="expert_coder",
         llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
         system_message=coder_system_message,
     )
 
     advanced_assistant: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="advanced_assistant",
-        llm_config=get_llm_config(custom_config or configs.claude_3_opus),
+        llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
         system_message="""
             An advanced helper. You are expected to assist with complex tasks, which may include deep analysis,
             generating sophisticated ideas, solving intricate problems, and more.
@@ -299,7 +310,7 @@ class Agents(TypedDict):
     critic: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="critic",
         llm_config=get_llm_config(
-            custom_config or configs.claude_35_sonnet, {"temperature": 0.1}
+            custom_config or configs.gpt4_o_config, {"temperature": 0.1}
         ),
         system_message="""
             Critic AI LLM.
