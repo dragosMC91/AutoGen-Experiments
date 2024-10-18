@@ -4,6 +4,7 @@ from utils.http_utils import (
     get_latest_arxiv_papers,
 )
 
+
 class Functions:
     get_dad_jokes = {
         "name": "get_dad_jokes",
