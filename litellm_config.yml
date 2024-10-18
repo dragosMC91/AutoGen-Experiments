@@ -38,6 +38,11 @@ model_list:
     litellm_params:
       model: gpt-4o-2024-08-06
       api_key: os.environ/OPENAI_API_KEY
+
+  - model_name: openai/gpt-4o-mini
+    litellm_params:
+      model: gpt-4o-mini
+      api_key: os.environ/OPENAI_API_KEY
       api_base: https://api.openai.com/v1
 
   - model_name: openai/o1-preview
