@@ -9,7 +9,7 @@ from datetime import datetime, timedelta
 from requests.exceptions import ConnectionError
 import logging
 
-logging.basicConfig(level=logging.INFO)
+logging.basicConfig(level=logging.WARNING)
 logger = logging.getLogger(__name__)
 
 RATE_LIMIT = 3  # seconds
