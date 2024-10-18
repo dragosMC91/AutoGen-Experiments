@@ -55,8 +55,14 @@ def ask_for_prompt_input(
     from the terminal require keeping the Fn key pressed.
     """
     prompt_suffix = 'Submit prompt via (Meta|Esc)+Enter.'
+    original = 'Press enter to skip and use auto-reply'
+    formatted = (
+        '\nLeave prompt empty for auto-reply or to execute LLM suggested function call'
+    )
     user_prompt = toolkit_prompt(
-        HTML(f'<ansigreen>\n{prompt}\n{prompt_suffix}\n\n</ansigreen>'),
+        HTML(
+            f'<ansigreen>\n{prompt.replace(original, formatted)}\n{prompt_suffix}\n\n</ansigreen>'
+        ),
         multiline=True,
         lexer=PygmentsLexer(PythonLexer),
     )
