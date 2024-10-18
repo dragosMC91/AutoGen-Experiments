@@ -62,9 +62,7 @@ class StartLiteLLMServerCommand(CustomCommand):
         # loading the secrets file is needed to gain access to the mistral api key
         # without having to expose it in the litellm config file directly
         module.load_env('.env.secrets')
-        check_call(
-            ['litellm', '--config', 'litellm_config.yml', '--port', '30000', '--debug']
-        )
+        check_call(['litellm', '--config', 'litellm_config.yml', '--port', '30000'])
 
 
 class StartAutogenStudioCommand(CustomCommand):
@@ -174,6 +172,7 @@ setup(
         'pyflakes==3.1.0',
         'Pygments==2.17.2',
         'PyJWT==2.8.0',
+        'pypdf==5.0.1',
         'pyproject_hooks==1.0.0',
         'python-dotenv==1.0.0',
         'python-multipart==0.0.9',

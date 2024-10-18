@@ -5,7 +5,7 @@ import autogen
 import json
 import os
 from typing import TypedDict, get_type_hints, List, Dict, Any
-from utils import file_utils, prompt_utils, requests
+from utils import file_utils, prompt_utils, http_utils
 from config import config
 
 DEFAULT_FILE_LOCATION = '.'
@@ -28,29 +28,29 @@ def get_config(models: list[str]):
 
 
 # if LiteLLM server is started, route all traffic through that proxy server
-openai_model_prefix = 'openai/' if requests.is_litellm_server_running() else ''
+openai_model_prefix = 'openai/' if http_utils.is_litellm_server_running() else ''
 
 
 class Configs:
     claude_35_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3.5-sonnet"])
-    gpt4_o_config: List[Dict[str, Any]] = get_config(
+    gpt4_o: List[Dict[str, Any]] = get_config(
         [
             # gpt-4o-2024-08-06 is 2x times cheaper than gpt-4o
             # f"{openai_model_prefix}gpt-4o",
             f"{openai_model_prefix}gpt-4o-2024-08-06",
         ]
     )
-    gpt4_turbo_config: List[Dict[str, Any]] = get_config(
+    gpt4_turbo: List[Dict[str, Any]] = get_config(
         [
             f"{openai_model_prefix}gpt-4-turbo-2024-04-09",
         ]
     )
-    # gpt4_o1_config: List[Dict[str, Any]] = get_config(
+    # gpt4_o1: List[Dict[str, Any]] = get_config(
     #     [
     #         f"{openai_model_prefix}o1-preview",
     #     ]
     # )
-    # gpt4_o1_mini_config: List[Dict[str, Any]] = get_config(
+    # gpt4_o1_mini: List[Dict[str, Any]] = get_config(
     #     [
     #         f"{openai_model_prefix}o1-mini",
     #     ]
@@ -59,17 +59,18 @@ class Configs:
     claude_3_opus: List[Dict[str, Any]] = get_config(["anthropic/claude-3-opus"])
     claude_3_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3-sonnet"])
     claude_3_haiku: List[Dict[str, Any]] = get_config(["anthropic/claude-3-haiku"])
-    gpt3_config: List[Dict[str, Any]] = get_config(
+    gpt4o_mini: List[Dict[str, Any]] = get_config([f"{openai_model_prefix}gpt-4o-mini"])
+    gpt3: List[Dict[str, Any]] = get_config(
         [
             f"{openai_model_prefix}gpt-3.5-turbo-0125",
             f"{openai_model_prefix}gpt-3.5-turbo",
         ]
     )
-    mistral_medium_config: List[Dict[str, Any]] = get_config(["mistral/mistral-medium"])
-    mistral_large_config: List[Dict[str, Any]] = get_config(["mistral/mistral-large"])
-    dalle_config: List[Dict[str, Any]] = get_config(["dall-e-3"])
-    gpt4_vision_config: List[Dict[str, Any]] = get_config(["gpt-4-vision-preview"])
-    codellama_config: List[Dict[str, Any]] = get_config(["ollama/codellama:34b"])
+    mistral_medium: List[Dict[str, Any]] = get_config(["mistral/mistral-medium"])
+    mistral_large: List[Dict[str, Any]] = get_config(["mistral/mistral-large"])
+    dalle: List[Dict[str, Any]] = get_config(["dall-e-3"])
+    gpt4_vision: List[Dict[str, Any]] = get_config(["gpt-4-vision-preview"])
+    codellama: List[Dict[str, Any]] = get_config(["ollama/codellama:34b"])
 
 
 def get_config_options():
@@ -250,7 +251,7 @@ class Agents(TypedDict):
 
     nutritionist: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="nutritionist",
-        llm_config=get_llm_config(custom_config or configs.gpt4_o_config),
+        llm_config=get_llm_config(custom_config or configs.gpt4_o),
         system_message="""
             Agent name = nutritionist. You are a vegan dietician/nutritionist. Your task is to analyze the macronutrients (proteins, fats, and carbohydrates)
             of each dish presented to you. Based on your analysis, you will suggest complementary vegan foods that the individual
@@ -262,7 +263,7 @@ class Agents(TypedDict):
     prompt_engineer: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="prompt_engineer",
         llm_config=get_llm_config(
-            custom_config or configs.gpt4_turbo_config, {"temperature": 0.3}
+            custom_config or configs.gpt4_turbo, {"temperature": 0.3}
         ),
         system_message="""
             Agent name = prompt_engineer. An agent specialized for writing prompts
@@ -299,7 +300,7 @@ class Agents(TypedDict):
 
     master_chef: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="master_chef",
-        llm_config=get_llm_config(custom_config or configs.gpt4_o_config),
+        llm_config=get_llm_config(custom_config or configs.gpt4_o),
         system_message="""
             Agent name = master_chef. A highly skilled and creative vegan chef with extensive knowledge of plant-based ingredients and cuisines from around the world.
             This chef is adept at creating nutritious, flavorful, and visually appealing vegan dishes,
@@ -310,7 +311,7 @@ class Agents(TypedDict):
     critic: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="critic",
         llm_config=get_llm_config(
-            custom_config or configs.gpt4_o_config, {"temperature": 0.1}
+            custom_config or configs.gpt4_o, {"temperature": 0.1}
         ),
         system_message="""
             Agent name = critic. Critic AI LLM.
@@ -326,7 +327,7 @@ class Agents(TypedDict):
 
     qa_automation_engineer: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="qa_automation_engineer",
-        llm_config=get_llm_config(custom_config or configs.gpt3_config),
+        llm_config=get_llm_config(custom_config or configs.gpt4o_mini),
         system_message="""
             Agent name = qa_automation_engineer. QA Automation Engineer LLM:
             Develops and maintains automation frameworks for software testing.
@@ -341,7 +342,7 @@ class Agents(TypedDict):
 
     image_analyst: MultimodalConversableAgent = lambda *args: MultimodalConversableAgent(
         name="image_analyst",
-        llm_config=get_llm_config(configs.gpt4_vision_config, {"temperature": 0.5}),
+        llm_config=get_llm_config(configs.gpt4_vision, {"temperature": 0.5}),
         system_message="""
             Agent name = image_analyst. Expert image analyst capable of categorizing all images provided to him.
             """,
@@ -350,7 +351,7 @@ class Agents(TypedDict):
 
     image_generator: autogen.ConversableAgent = lambda *args: autogen.ConversableAgent(
         name="image_generator",
-        llm_config=get_llm_config(configs.dalle_config, {"temperature": 0.7}),
+        llm_config=get_llm_config(configs.dalle, {"temperature": 0.7}),
         system_message="""
             Agent name = image_generator. A creative agent tasked with generating high quality images.
             """,
@@ -361,15 +362,15 @@ class Agents(TypedDict):
         name="user_proxy",
         human_input_mode="ALWAYS",
         max_consecutive_auto_reply=10,
-        is_termination_msg=lambda x: x.get("content", "")
-        .rstrip()
-        .endswith("TERMINATE"),
+        is_termination_msg=lambda x: bool(
+            x.get('content') and str(x['content']).strip().endswith("TERMINATE")
+        ),
         code_execution_config={
             "work_dir": "generated_content",
             # "use_docker": "python:3.10.13",
             "use_docker": False,
         },
-        llm_config=get_llm_config(configs.gpt3_config),
+        llm_config=get_llm_config(configs.claude_35_sonnet),
         system_message="""
             Reply TERMINATE if the task has been solved at full satisfaction.
             Otherwise, reply CONTINUE, or the reason why the task is not solved yet.

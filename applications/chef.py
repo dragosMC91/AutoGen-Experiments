@@ -14,7 +14,7 @@ groupchat = autogen.GroupChat(
 )
 manager = autogen.GroupChatManager(
     groupchat=groupchat,
-    llm_config=custom_agents.get_llm_config(custom_agents.Configs.gpt3_config),
+    llm_config=custom_agents.get_llm_config(custom_agents.Configs.gpt3),
 )
 
 user_proxy.initiate_chat(

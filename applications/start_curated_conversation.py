@@ -23,7 +23,7 @@ groupchat = autogen.GroupChat(
 
 manager = autogen.GroupChatManager(
     groupchat=groupchat,
-    llm_config=custom_agents.get_llm_config(custom_agents.Configs.gpt3_config),
+    llm_config=custom_agents.get_llm_config(custom_agents.Configs.gpt4o_mini),
     code_execution_config=False,
     system_message="""
     Manage the chat between the the coder and the critic.
