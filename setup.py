@@ -143,7 +143,6 @@ setup(
         'h11==0.14.0',
         'httpcore==1.0.2',
         'httpx==0.25.1',
-        'huggingface-hub==0.19.4',
         'idna==3.4',
         'importlib-metadata==6.8.0',
         'Jinja2==3.1.2',
@@ -209,7 +208,12 @@ setup(
         'proxy': [
             'litellm[extra_proxy]',
             'litellm[proxy]',
-        ]
+        ],
+        'text-compression': [
+            'pyautogen[long-context]',
+            'huggingface-hub==0.26.0',
+            'accelerate==1.0.1',
+        ],
     },
     cmdclass=dict(
         fix=create_command(
