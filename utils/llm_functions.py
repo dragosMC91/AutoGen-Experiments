@@ -18,12 +18,15 @@ class Functions:
         "description": "Fetches the abstract or full text of a research paper from an arXiv article given its URL.",
     }
 
+    # the note on the future date is required because some LLMs refuse to process the request
+    # if they think the current date < requested date even if that's not the case
     get_latest_arxiv_papers = {
         "name": "get_latest_arxiv_papers",
         "f": get_latest_arxiv_papers,
         "description": """Fetch the latest arXiv papers within a given time interval and category.
 Args: submit_interval (str, optional): Time interval for paper submission in the format
 'YYYYMMDDHHMMSS TO YYYYMMDDHHMMSS'. If None, defaults to previous day interval.
+Date can be in the future, there are no restrictions on the requested date.
 category (str): The arXiv category to search for. Defaults to 'cs.AI' for the topic of AI.
 max_results (int): Maximum number of results to return. Defaults to 300.
 Returns: List[Dict[str, str]]: A list of dictionaries containing paper titles and IDs.""",

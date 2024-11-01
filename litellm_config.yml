@@ -92,7 +92,8 @@ model_list:
 
   - model_name: anthropic/claude-3.5-sonnet
     litellm_params:
-      model: claude-3-5-sonnet-20240620
+      # model: claude-3-5-sonnet-20240620
+      model: claude-3-5-sonnet-20241022
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
       max_tokens: 4000
