@@ -1,6 +1,8 @@
 import os
 import logging
+from utils import file_utils
 
+file_utils.load_env('.env.secrets')
 base_url = "http://localhost:30000"
 
 
