@@ -2,6 +2,7 @@
 # are curated by 2 agents: 1 autogen agent and 1 llamaindex agent
 # the proxy user (manually controlled by the human) forwards questions to
 # the autogen agent who decides if calling llamaindex is required
+# don't forget to install the required extra tools via pip install -e '.[rag]'
 from agents import custom_agents
 from utils import prompt_utils, file_utils
 from autogen import register_function
@@ -15,13 +16,12 @@ files = [
         "path": f"{file_utils.get_project_root()}/external_knowledge_docs/2023_canada_federal_budget.pdf",
     },
 ]
-priming_message = f"""The AI assistant has access to a query engine which stores
+priming_message = """The AI assistant has access to a query engine which stores
 data from a few specific sources. Query engine should be used in the following situations:
 1. the question is strictly related to information stored in the query engine
-2. the assistant is not 100% sure of its answer and a double check is needed
+2. the assistant is not 100% certain of its answer and a double check is needed
 The query passed to the engine needs to be specific and focus on keywords related
-to the information which is requested. Very important: the language of the query
-must always match the language of the document specified by the language field. Query engine document: {files}
+to the information which is requested.
 """
 
 
@@ -65,7 +65,7 @@ def query(question: str) -> str:
 register_function(
     name="query",
     f=query,
-    description="Queries the wikipedia page about 2023 canadian federal budget.",
+    description=f"Queries the following documents: {files}. use the same language as document language for the query!",
     caller=assistant,
     executor=user_proxy,
 )
