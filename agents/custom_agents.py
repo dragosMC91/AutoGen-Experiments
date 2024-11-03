@@ -5,7 +5,7 @@ import autogen
 import json
 import os
 from typing import TypedDict, get_type_hints, List, Dict, Any
-from utils import file_utils, prompt_utils, http_utils
+from utils import prompt_utils, http_utils
 from config import config
 
 DEFAULT_FILE_LOCATION = '.'
@@ -14,7 +14,6 @@ DEFAULT_SEED = 42
 DEFAULT_TEMPERATURE = 0
 
 
-file_utils.load_env('.env.secrets')
 os.environ["llms_config"] = json.dumps(config.get_llms_config())
 
 
