@@ -13,6 +13,7 @@ from prompt_toolkit.formatted_text import HTML
 from contextlib import contextmanager
 from rich.console import Console
 from rich.text import Text
+from rich.syntax import Syntax
 
 from rich.progress import (
     Progress,
@@ -22,6 +23,9 @@ from rich.progress import (
 
 from autogen.io.base import IOStream
 from typing import Any
+
+line_separator = "\n" + "-" * 80
+console = Console()
 
 
 class CustomLexer(Lexer):
@@ -66,12 +70,8 @@ def ask_for_prompt_input(
         multiline=True,
         lexer=PygmentsLexer(PythonLexer),
     )
-    print("\n", "-" * 80, flush=True, sep="")
+    print(line_separator, flush=True, sep="")
     return user_prompt
-
-
-def ask_for_initial_prompt_input():
-    return ask_for_prompt_input()
 
 
 def is_non_empty_prompt(prompt):
@@ -80,16 +80,75 @@ def is_non_empty_prompt(prompt):
 
 
 def get_initial_prompt(prompt=""):
-    return prompt if is_non_empty_prompt(prompt) else ask_for_initial_prompt_input()
+    return prompt if is_non_empty_prompt(prompt) else ask_for_prompt_input()
 
 
-console = Console()
-
-
-def is_code_snippet(arg):
+def has_code_snippet(arg):
     # Simple heuristic to determine if a string might be a code snippet
     # This can be adjusted based on the characteristics of your code snippets
     return '\n' in arg and ('    ' in arg or '\t' in arg)
+
+
+def split_code_blocks(text: str):
+    """Split text containing code blocks into separate text and code blocks.
+
+    Args:
+        text (str): Input text containing markdown code blocks delimited by triple backticks
+        and optional language specifiers.
+
+    Returns:
+        List[Dict[str, str]]: List of dictionaries representing text and code blocks.
+        Each dictionary has the following structure:
+        - For text blocks: {'type': 'text', 'content': str}
+        - For code blocks: {'type': 'code', 'language': str, 'content': str}
+    """
+    LANGUAGE_MAPPING = {
+        'javascript': 'javascript',
+        'typescript': 'typescript',
+        'python': 'python',
+        'bash': 'bash',
+        'js': 'javascript',
+        'ts': 'typescript',
+        'py': 'python',
+        'sh': 'bash',
+    }
+    code_pattern = re.compile(
+        f'```({"|".join(LANGUAGE_MAPPING.keys())})\n?(.*?)\n?```', re.DOTALL
+    )
+    blocks = []
+    last_end = 0
+    for match in code_pattern.finditer(text):
+        language = match.group(1).lower()
+        normalized_lang = LANGUAGE_MAPPING[language]
+
+        # add text before code block
+        if match.start() > last_end:
+            blocks.append({'type': 'text', 'content': text[last_end : match.start()]})
+        blocks.append(
+            {
+                'type': 'code',
+                'language': normalized_lang,
+                'content': match.group(2).strip(),
+            }
+        )
+
+        last_end = match.end()
+
+    # add remaining text
+    if last_end < len(text):
+        blocks.append({'type': 'text', 'content': text[last_end:]})
+
+    return blocks
+
+
+def get_code_syntax(code, programming_language):
+    return Syntax(
+        code,
+        programming_language,
+        theme="monokai",
+        word_wrap=False,
+        background_color="default",
+    )
 
 
 class RichIOStream(IOStream):
@@ -102,11 +161,27 @@ class RichIOStream(IOStream):
         processed_args = []
         for arg in args:
             if isinstance(arg, str):
-                if is_code_snippet(arg):
+                # markdown could be also be neatly formatted but most of the time that's not
+                # what we want (special chars like ### are also needed when generating a md doc)
+                if has_code_snippet(arg):
                     # Handle potential code snippets differently
                     # For example, by not converting them with Text.from_ansi
                     # This preserves formatting but does not interpret ANSI codes
-                    processed_args.append(arg)
+
+                    # use this for code snippets
+                    blocks = split_code_blocks(arg)
+                    for block in blocks:
+                        if block['type'] == 'code':
+                            language = block['language']
+                            processed_args.append(f'```{language}')
+                            processed_args.append(
+                                get_code_syntax(block['content'], language)
+                            )
+                            processed_args.append('```')
+                        else:
+                            processed_args.append(block['content'])
+
+                    # processed_args.append(Markdown(arg))
                 else:
                     # Convert args with ANSI codes into rich Text objects
                     processed_args.append(Text.from_ansi(arg))
@@ -136,7 +211,7 @@ def rich_print(*args, **kwargs):
     processed_args = []
     for arg in args:
         if isinstance(arg, str):
-            if is_code_snippet(arg):
+            if has_code_snippet(arg):
                 # Handle potential code snippets differently
                 # For example, by not converting them with Text.from_ansi
                 # This preserves formatting but does not interpret ANSI codes
@@ -228,7 +303,7 @@ def ask_for_prompt_with_completer(
     # selecting an option, otherwise, print a warning message.
     is_input_skipped = not selection_mandatory and selected_option == ''
     if selected_option in options or is_input_skipped:
-        print("\n", "-" * 80, flush=True, sep="")
+        print(line_separator, flush=True, sep="")
         return selected_option
     else:
         print(
