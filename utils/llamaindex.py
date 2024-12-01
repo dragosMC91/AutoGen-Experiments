@@ -26,7 +26,7 @@ class QueryEngineConfig:
     persist_dir: str = None
     input_dir: str = None
     embedding_model: str = "text-embedding-3-small"
-    llm_model: str = "gpt-4o-2024-08-06"
+    llm_model: str = "gpt-4o-2024-11-20"
     temperature: float = 0.0
 
 

@@ -34,9 +34,8 @@ class Configs:
     claude_35_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3.5-sonnet"])
     gpt4_o: List[Dict[str, Any]] = get_config(
         [
-            # gpt-4o-2024-08-06 is 2x times cheaper than gpt-4o
             # f"{openai_model_prefix}gpt-4o",
-            f"{openai_model_prefix}gpt-4o-2024-08-06",
+            f"{openai_model_prefix}gpt-4o-2024-11-20",
         ]
     )
     gpt4_o1: List[Dict[str, Any]] = get_config(
@@ -49,6 +48,7 @@ class Configs:
             f"{openai_model_prefix}gpt-4-turbo-2024-04-09",
         ]
     )
+    claude_35_haiku: List[Dict[str, Any]] = get_config(["anthropic/claude-3.5-haiku"])
     gpt4_o1_mini: List[Dict[str, Any]] = get_config(
         [
             f"{openai_model_prefix}o1-mini",
@@ -235,6 +235,36 @@ class Agents(TypedDict):
             """,
     )
 
+    task_planner: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
+        name="task_planner",
+        llm_config=get_llm_config(custom_config or configs.gpt4_o),
+        system_message="""
+            Agent name = task_planner. You are an advanced language model whose task is to analyze and restructure user input into a clear, organized format.
+            Follow these step:
+            1. First, identify the core components of the input (main objective/goal, key requirements, constraints, specific details or parameters)
+            2. Then, organize this information into the following structured format:
+                PRIMARY OBJECTIVE:
+                [Clear statement of the main goal]
+
+                KEY REQUIREMENTS:
+                - [Requirement 1]
+                - [Requirement 2]
+                - [Additional requirements as needed]
+
+                CONSTRAINTS:
+                - [Constraint 1]
+                - [Constraint 2]
+                - [Additional constraints as needed]
+
+                SPECIFIC PARAMETERS:
+                - [Parameter 1]
+                - [Parameter 2]
+                - [Additional parameters as needed]
+            3. Lastly structure the output: Organize the extracted information into a clear, logical format that can be easily executed. Use bullet points, numbered
+            lists, or sections as needed. Ensure all critical information is captured and clearly organized.
+            """,
+    )
+
     basic_assistant: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="basic_assistant",
         llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
@@ -261,7 +291,7 @@ class Agents(TypedDict):
     prompt_engineer: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="prompt_engineer",
         llm_config=get_llm_config(
-            custom_config or configs.gpt4_turbo, {"temperature": 0.3}
+            custom_config or configs.gpt4_o, {"temperature": 0.3}
         ),
         system_message="""
             Agent name = prompt_engineer. An agent specialized for writing prompts

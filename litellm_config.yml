@@ -34,9 +34,9 @@ model_list:
       api_key: os.environ/OPENAI_API_KEY
       api_base: https://api.openai.com/v1
 
-  - model_name: openai/gpt-4o-2024-08-06
+  - model_name: openai/gpt-4o-2024-11-20
     litellm_params:
-      model: gpt-4o-2024-08-06
+      model: gpt-4o-2024-11-20
       api_key: os.environ/OPENAI_API_KEY
 
   - model_name: openai/gpt-4o-mini
@@ -92,8 +92,14 @@ model_list:
 
   - model_name: anthropic/claude-3.5-sonnet
     litellm_params:
-      # model: claude-3-5-sonnet-20240620
       model: claude-3-5-sonnet-20241022
+      api_base: https://api.anthropic.com/v1/messages
+      api_key: os.environ/ANTHROPIC_API_KEY
+      max_tokens: 4000
+
+  - model_name: anthropic/claude-3.5-haiku
+    litellm_params:
+      model: claude-3-5-haiku-20241022
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
       max_tokens: 4000
