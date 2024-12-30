@@ -8,10 +8,10 @@ base_url = "http://localhost:30000"
 
 def get_llms_config():
     config = [
+        # OpenAI models
         {"model": "gpt-3.5-turbo-0125", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-3.5-turbo", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4-turbo-2024-04-09", "api_key": os.getenv('OPENAI_API_KEY')},
-        # {"model": "gpt-4o", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4o-2024-11-20", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4o-mini", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o1-mini", "api_key": os.getenv('OPENAI_API_KEY')},
@@ -20,13 +20,9 @@ def get_llms_config():
         {"model": "dall-e-3", "api_key": os.getenv('OPENAI_API_KEY')},
         {
             "base_url": base_url,
-            "model": "mistral/mistral-medium",
-            "api_key": os.getenv('LITELLM_MASTER_KEY'),
-        },
-        {
-            "base_url": base_url,
             "model": "openai/o1-preview",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.015, 0.06],
         },
         {
             "base_url": base_url,
@@ -43,6 +39,7 @@ def get_llms_config():
             "base_url": base_url,
             "model": "openai/o1-mini",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.003, 0.012],
         },
         {
             "base_url": base_url,
@@ -64,22 +61,23 @@ def get_llms_config():
             "model": "openai/dall-e-3",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
+        # MistralAI models
+        {
+            "base_url": base_url,
+            "model": "mistral/mistral-medium",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+        },
         {
             "base_url": base_url,
             "model": "mistral/mistral-large",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
         },
+        # AnthropicAI models
         {
             "base_url": base_url,
             "model": "anthropic/claude-3-opus",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.015, 0.075],
-        },
-        {
-            "base_url": base_url,
-            "model": "anthropic/claude-3-sonnet",
-            "api_key": os.getenv('LITELLM_MASTER_KEY'),
-            "price": [0.003, 0.015],
         },
         {
             "base_url": base_url,
@@ -93,12 +91,20 @@ def get_llms_config():
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.001, 0.005],
         },
+        # OpenRouter models
         {
             "base_url": base_url,
-            "model": "anthropic/claude-3-haiku",
+            "model": "openrouter/llama-3.1-sonar-large-online",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
-            "price": [0.00025, 0.00125],
+            "price": [0.001, 0.001],
         },
+        {
+            "base_url": base_url,
+            "model": "openrouter/deepseek-v3",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00014, 0.00028],
+        },
+        # Local ollama models
         {
             "base_url": base_url,
             "model": "ollama/codellama:34b",

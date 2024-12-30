@@ -43,6 +43,16 @@ class Configs:
             f"{openai_model_prefix}o1-preview",
         ]
     )
+    llama_31_sonar_online: List[Dict[str, Any]] = get_config(
+        [
+            "openrouter/llama-3.1-sonar-large-online",
+        ]
+    )
+    deepseek_v3: List[Dict[str, Any]] = get_config(
+        [
+            "openrouter/deepseek-v3",
+        ]
+    )
     gpt4_turbo: List[Dict[str, Any]] = get_config(
         [
             f"{openai_model_prefix}gpt-4-turbo-2024-04-09",
@@ -55,8 +65,6 @@ class Configs:
         ]
     )
     claude_3_opus: List[Dict[str, Any]] = get_config(["anthropic/claude-3-opus"])
-    claude_3_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3-sonnet"])
-    claude_3_haiku: List[Dict[str, Any]] = get_config(["anthropic/claude-3-haiku"])
     gpt4o_mini: List[Dict[str, Any]] = get_config([f"{openai_model_prefix}gpt-4o-mini"])
     gpt3: List[Dict[str, Any]] = get_config(
         [
