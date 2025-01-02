@@ -12,7 +12,7 @@
     1. [Lint code](#1-lint-code)
     2. [Review code from file using gpt4](#2-review-code-from-file-using-gpt4)
     3. [Start the LiteLLM proxy server](#3-start-the-litellm-proxy-server)
-    4. [Start Autogen Studio GUI (terminal usage recommended instead of ui)](#4-start-autogen-studio-gui-terminal-usage-recommended-instead-of-ui)
+    4. ~~[Start Autogen Studio GUI (terminal usage recommended instead of ui)](#4-start-autogen-studio-gui-terminal-usage-recommended-instead-of-ui)~~ (temporarily deprecated)
     5. [Monitor costs and view usage](#5-monitor-costs-and-view-usage)
 7. [Running the Applications](#running-the-applications)
     1. [Start conversation](#1-start-conversation)
@@ -71,9 +71,14 @@ Once you have the correct version of Python set up, install the project dependen
 pip install -e .
 ```
 
-If you also plan to setup and use the the litellm proxy dashboard UI, which offers neat costs monitoring and usage statistics, install the extra dependencies via:
+If you also plan to setup and use the the litellm proxy dashboard UI, which offers neat costs monitoring and usage statistics, install `autogen-experiments[proxy]` extra dependencies via:
 ```sh
 pip install -e '.[proxy]'
+```
+
+Depending on your use cases, you might need other extra dependencies like `autogen-experiments[text-compression]` | `autogen-experiments[rag]` which you can install individually or just install everything via
+```sh
+pip install -e '.[all]'
 ```
 
 ## Configuration

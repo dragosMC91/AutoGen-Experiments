@@ -23,7 +23,7 @@ groupchat = autogen.GroupChat(
 
 manager = autogen.GroupChatManager(
     groupchat=groupchat,
-    llm_config=custom_agents.get_llm_config(custom_agents.Configs.gpt4o_mini),
+    llm_config=custom_agents.get_llm_config(custom_agents.Configs.deepseek_v3),
     code_execution_config=False,
     system_message="""
     Manage a chat workflow between a task planner, an assistant and a critic.
