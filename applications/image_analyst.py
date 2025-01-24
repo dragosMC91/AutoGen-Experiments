@@ -3,7 +3,7 @@ from utils import prompt_utils
 
 message = """
 write 2 test cases for the section of the bayut.com website in the following image:
-<img /Users/dragoscampean/Desktop/bayut.jpg>
+<img /Users/dragoscampean/Documents/AutoGen-Experiments/dalle_art/1735804805.45574.png>
 """
 
 user_proxy, image_analyst = custom_agents.get_agents(

@@ -7,12 +7,12 @@ import os
 from typing import TypedDict, get_type_hints, List, Dict, Any
 from utils import prompt_utils, http_utils
 from config import config
+from clients.oai_llama_online import CitationEnabledOpenAIClient
 
 DEFAULT_FILE_LOCATION = '.'
 DEFAULT_REQUEST_TIMEOUT = 300
 DEFAULT_SEED = 42
 DEFAULT_TEMPERATURE = 0
-
 
 os.environ["llms_config"] = json.dumps(config.get_llms_config())
 
@@ -36,6 +36,11 @@ class Configs:
         [
             # f"{openai_model_prefix}gpt-4o",
             f"{openai_model_prefix}gpt-4o-2024-11-20",
+        ]
+    )
+    deepseek_r1: List[Dict[str, Any]] = get_config(
+        [
+            "openrouter/deepseek-r1",
         ]
     )
     gpt4_o1: List[Dict[str, Any]] = get_config(
@@ -75,7 +80,6 @@ class Configs:
     mistral_medium: List[Dict[str, Any]] = get_config(["mistral/mistral-medium"])
     mistral_large: List[Dict[str, Any]] = get_config(["mistral/mistral-large"])
     dalle: List[Dict[str, Any]] = get_config(["dall-e-3"])
-    gpt4_vision: List[Dict[str, Any]] = get_config(["gpt-4-vision-preview"])
     codellama: List[Dict[str, Any]] = get_config(["ollama/codellama:34b"])
 
 
@@ -245,7 +249,7 @@ class Agents(TypedDict):
 
     task_planner: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="task_planner",
-        llm_config=get_llm_config(custom_config or configs.gpt4_o),
+        llm_config=get_llm_config(custom_config or configs.deepseek_v3),
         system_message="""
             Agent name = task_planner. You are an advanced language model whose task is to analyze and restructure user input into a clear, organized format.
             Follow these step:
@@ -336,7 +340,7 @@ class Agents(TypedDict):
 
     master_chef: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="master_chef",
-        llm_config=get_llm_config(custom_config or configs.gpt4_o),
+        llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
         system_message="""
             Agent name = master_chef. A highly skilled and creative vegan chef with extensive knowledge of plant-based ingredients and cuisines from around the world.
             This chef is adept at creating nutritious, flavorful, and visually appealing vegan dishes,
@@ -360,7 +364,7 @@ class Agents(TypedDict):
 
     qa_automation_engineer: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="qa_automation_engineer",
-        llm_config=get_llm_config(custom_config or configs.gpt4o_mini),
+        llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
         system_message="""
             Agent name = qa_automation_engineer. QA Automation Engineer LLM:
             Develops and maintains automation frameworks for software testing.
@@ -375,7 +379,7 @@ class Agents(TypedDict):
 
     image_analyst: MultimodalConversableAgent = lambda *args: MultimodalConversableAgent(
         name="image_analyst",
-        llm_config=get_llm_config(configs.gpt4_vision, {"temperature": 0.5}),
+        llm_config=get_llm_config(configs.claude_35_sonnet, {"temperature": 0.5}),
         system_message="""
             Agent name = image_analyst. Expert image analyst capable of categorizing all images provided to him.
             """,
@@ -403,7 +407,7 @@ class Agents(TypedDict):
             # "use_docker": "python:3.10.13",
             "use_docker": False,
         },
-        llm_config=get_llm_config(configs.claude_35_sonnet),
+        llm_config=get_llm_config(configs.deepseek_v3),
         system_message="""
             Reply TERMINATE if the task has been solved at full satisfaction.
             Otherwise, reply CONTINUE, or the reason why the task is not solved yet.
@@ -434,6 +438,10 @@ def get_agents_options():
 def get_agents(names, overwrite_config=None) -> Agents:
     """Retrieves a dictionary of agent configurations.
 
+    Args:
+        names: List of agent names to initialize
+        overwrite_config: Configuration dictionary to override default settings
+
     Returns:
         A dictionary with agent names as keys and their corresponding configurations as values.
     """
@@ -445,4 +453,18 @@ def get_agents(names, overwrite_config=None) -> Agents:
             f"The following agents definition not found: {', '.join(missing_agents)}"
         )
 
-    return {name: getattr(Agents, name)(overwrite_config) for name in names}
+    agents = {name: getattr(Agents, name)(overwrite_config) for name in names}
+
+    # extra initialization rules for agents
+    for agent in agents.values():
+        model_client_cls = agent.llm_config.get("config_list", [{}])[0].get(
+            "model_client_cls"
+        )
+        if model_client_cls == 'CitationEnabledOpenAIClient':
+            agent.register_model_client(model_client_cls=CitationEnabledOpenAIClient)
+            # since we are using a hybrid client extending OpenAIClient which just overrides message_retrieval,
+            # after the new client is registered, the custom model_client_cls attribute must be removed
+            # otherwise OpenAIWrapper.create will throw an error because it can't handle model_client_cls
+            agent.client._config_list[0].pop('model_client_cls', None)
+
+    return agents

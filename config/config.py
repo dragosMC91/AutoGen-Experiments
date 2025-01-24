@@ -16,7 +16,6 @@ def get_llms_config():
         {"model": "gpt-4o-mini", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o1-mini", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o1-preview", "api_key": os.getenv('OPENAI_API_KEY')},
-        {"model": "gpt-4-vision-preview", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "dall-e-3", "api_key": os.getenv('OPENAI_API_KEY')},
         {
             "base_url": base_url,
@@ -97,12 +96,19 @@ def get_llms_config():
             "model": "openrouter/llama-3.1-sonar-large-online",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.001, 0.001],
+            "model_client_cls": "CitationEnabledOpenAIClient",
         },
         {
             "base_url": base_url,
             "model": "openrouter/deepseek-v3",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.00014, 0.00028],
+        },
+        {
+            "base_url": base_url,
+            "model": "openrouter/deepseek-r1",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00055, 0.00219],
         },
         # Local ollama models
         {
