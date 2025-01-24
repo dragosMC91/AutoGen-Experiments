@@ -104,6 +104,12 @@ def get_llms_config():
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.00014, 0.00028],
         },
+        {
+            "base_url": base_url,
+            "model": "openrouter/deepseek-r1",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00055, 0.00219],
+        },
         # Local ollama models
         {
             "base_url": base_url,

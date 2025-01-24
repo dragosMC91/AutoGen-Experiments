@@ -38,6 +38,11 @@ class Configs:
             f"{openai_model_prefix}gpt-4o-2024-11-20",
         ]
     )
+    deepseek_r1: List[Dict[str, Any]] = get_config(
+        [
+            "openrouter/deepseek-r1",
+        ]
+    )
     gpt4_o1: List[Dict[str, Any]] = get_config(
         [
             f"{openai_model_prefix}o1-preview",

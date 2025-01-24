@@ -110,6 +110,12 @@ model_list:
       api_key: os.environ/OPENROUTER_API_KEY
       max_tokens: 4000
 
+  - model_name: openrouter/deepseek-r1
+    litellm_params:
+      model: openrouter/deepseek/deepseek-r1
+      api_key: os.environ/OPENROUTER_API_KEY
+      max_tokens: 4000
+
 litellm_settings:
   drop_params: True
   stream: False
