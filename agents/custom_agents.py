@@ -13,6 +13,7 @@ DEFAULT_FILE_LOCATION = '.'
 DEFAULT_REQUEST_TIMEOUT = 300
 DEFAULT_SEED = 42
 DEFAULT_TEMPERATURE = 0
+REASONING_MODELS = ['deepseek-r1', 'o1-mini', 'o1-preview']
 
 os.environ["llms_config"] = json.dumps(config.get_llms_config())
 
@@ -40,7 +41,7 @@ class Configs:
     )
     deepseek_r1: List[Dict[str, Any]] = get_config(
         [
-            "openrouter/deepseek-r1",
+            "deepseek/deepseek-r1",
         ]
     )
     gpt4_o1: List[Dict[str, Any]] = get_config(
@@ -55,7 +56,7 @@ class Configs:
     )
     deepseek_v3: List[Dict[str, Any]] = get_config(
         [
-            "openrouter/deepseek-v3",
+            "deepseek/deepseek-v3",
         ]
     )
     gpt4_turbo: List[Dict[str, Any]] = get_config(
@@ -457,14 +458,17 @@ def get_agents(names, overwrite_config=None) -> Agents:
 
     # extra initialization rules for agents
     for agent in agents.values():
-        model_client_cls = agent.llm_config.get("config_list", [{}])[0].get(
-            "model_client_cls"
-        )
+        agent_config = agent.llm_config.get("config_list", [{}])[0]
+        model_client_cls = agent_config.get("model_client_cls")
+        model_name = agent_config.get("model")
         if model_client_cls == 'CitationEnabledOpenAIClient':
             agent.register_model_client(model_client_cls=CitationEnabledOpenAIClient)
             # since we are using a hybrid client extending OpenAIClient which just overrides message_retrieval,
             # after the new client is registered, the custom model_client_cls attribute must be removed
             # otherwise OpenAIWrapper.create will throw an error because it can't handle model_client_cls
             agent.client._config_list[0].pop('model_client_cls', None)
+        # complex system messages result in lower performance for COT models
+        if any(name in model_name for name in REASONING_MODELS):
+            agent.update_system_message("")
 
     return agents

@@ -81,40 +81,54 @@ model_list:
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
       # explicit max_tokens required because a 256 default is being set otherwise
-      max_tokens: 4000
+      max_tokens: 4096
 
   - model_name: anthropic/claude-3.5-sonnet
     litellm_params:
       model: claude-3-5-sonnet-20241022
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
-      max_tokens: 4000
+      max_tokens: 4096
 
   - model_name: anthropic/claude-3.5-haiku
     litellm_params:
       model: claude-3-5-haiku-20241022
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
-      max_tokens: 4000
+      max_tokens: 4096
+
+  - model_name: deepseek/deepseek-v3
+    litellm_params:
+      model: deepseek/deepseek-chat
+      api_base: https://api.deepseek.com
+      api_key: os.environ/DEEPSEEK_API_KEY
+      max_tokens: 4096
+
+  - model_name: deepseek/deepseek-r1
+    litellm_params:
+      model: deepseek/deepseek-reasoner
+      api_base: https://api.deepseek.com
+      api_key: os.environ/DEEPSEEK_API_KEY
+      max_tokens: 4096
 
   - model_name: openrouter/llama-3.1-sonar-large-online
     litellm_params:
       model: openrouter/perplexity/llama-3.1-sonar-large-128k-online
       # api_base: https://openrouter.ai/api/v1/chat/completions
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4000
+      max_tokens: 4096
 
   - model_name: openrouter/deepseek-v3
     litellm_params:
       model: openrouter/deepseek/deepseek-chat
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4000
+      max_tokens: 4096
 
   - model_name: openrouter/deepseek-r1
     litellm_params:
       model: openrouter/deepseek/deepseek-r1
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4000
+      max_tokens: 4096
 
 litellm_settings:
   drop_params: True
