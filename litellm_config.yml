@@ -118,6 +118,13 @@ model_list:
       api_key: os.environ/OPENROUTER_API_KEY
       max_tokens: 4096
 
+  - model_name: openrouter/sonar-r1
+    litellm_params:
+      model: openrouter/perplexity/sonar-reasoning
+      # api_base: https://openrouter.ai/api/v1/chat/completions
+      api_key: os.environ/OPENROUTER_API_KEY
+      max_tokens: 4096
+
   - model_name: openrouter/deepseek-v3
     litellm_params:
       model: openrouter/deepseek/deepseek-chat

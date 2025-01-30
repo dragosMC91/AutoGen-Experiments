@@ -100,6 +100,13 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
+            "model": "openrouter/sonar-r1",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.001, 0.005],
+            "model_client_cls": "CitationEnabledOpenAIClient",
+        },
+        {
+            "base_url": base_url,
             "model": "openrouter/deepseek-v3",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.00014, 0.00028],
