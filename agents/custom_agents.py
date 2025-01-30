@@ -49,6 +49,11 @@ class Configs:
             f"{openai_model_prefix}o1-preview",
         ]
     )
+    sonar_r1: List[Dict[str, Any]] = get_config(
+        [
+            "openrouter/sonar-r1",
+        ]
+    )
     llama_31_sonar_online: List[Dict[str, Any]] = get_config(
         [
             "openrouter/llama-3.1-sonar-large-online",

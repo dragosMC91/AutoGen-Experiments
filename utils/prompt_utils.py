@@ -26,6 +26,20 @@ from typing import Any
 
 line_separator = "\n" + "-" * 80
 console = Console()
+LANGUAGE_MAPPING = {
+    'javascript': 'javascript',
+    'js': 'javascript',
+    'typescript': 'typescript',
+    'ts': 'typescript',
+    'python': 'python',
+    'bash': 'bash',
+    'sh': 'bash',
+    'shell': 'bash',
+    'py': 'python',
+}
+CODE_PATTERN = re.compile(
+    f'```({"|".join(LANGUAGE_MAPPING.keys())})\n?(.*?)\n?```', re.DOTALL
+)
 
 
 class CustomLexer(Lexer):
@@ -86,7 +100,9 @@ def get_initial_prompt(prompt=""):
 def has_code_snippet(arg):
     # Simple heuristic to determine if a string might be a code snippet
     # This can be adjusted based on the characteristics of your code snippets
-    return '\n' in arg and ('    ' in arg or '\t' in arg)
+    has_indentation = '\n' in arg and ('    ' in arg or '\t' in arg)
+    has_code_block = bool(CODE_PATTERN.search(arg))
+    return has_indentation or has_code_block
 
 
 def split_code_blocks(text: str):
@@ -102,22 +118,10 @@ def split_code_blocks(text: str):
         - For text blocks: {'type': 'text', 'content': str}
         - For code blocks: {'type': 'code', 'language': str, 'content': str}
     """
-    LANGUAGE_MAPPING = {
-        'javascript': 'javascript',
-        'typescript': 'typescript',
-        'python': 'python',
-        'bash': 'bash',
-        'js': 'javascript',
-        'ts': 'typescript',
-        'py': 'python',
-        'sh': 'bash',
-    }
-    code_pattern = re.compile(
-        f'```({"|".join(LANGUAGE_MAPPING.keys())})\n?(.*?)\n?```', re.DOTALL
-    )
+
     blocks = []
     last_end = 0
-    for match in code_pattern.finditer(text):
+    for match in CODE_PATTERN.finditer(text):
         language = match.group(1).lower()
         normalized_lang = LANGUAGE_MAPPING[language]
 
@@ -146,7 +150,7 @@ def get_code_syntax(code, programming_language):
         code,
         programming_language,
         theme="monokai",
-        word_wrap=False,
+        word_wrap=True,
         background_color="default",
     )
 
