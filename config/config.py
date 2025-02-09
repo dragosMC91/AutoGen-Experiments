@@ -129,6 +129,7 @@ def get_llms_config():
             "model": "deepseek/deepseek-r1",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.00055, 0.00219],
+            "model_client_cls": "ReasoningEnabledOpenAIClient",
         },
         # Local ollama models
         {

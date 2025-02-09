@@ -14,6 +14,7 @@ from contextlib import contextmanager
 from rich.console import Console
 from rich.text import Text
 from rich.syntax import Syntax
+from rich.panel import Panel
 
 from rich.progress import (
     Progress,
@@ -22,7 +23,8 @@ from rich.progress import (
 )
 
 from autogen.io.base import IOStream
-from typing import Any
+from typing import List, Tuple, Any
+from enum import Enum
 
 line_separator = "\n" + "-" * 80
 console = Console()
@@ -40,6 +42,16 @@ LANGUAGE_MAPPING = {
 CODE_PATTERN = re.compile(
     f'```({"|".join(LANGUAGE_MAPPING.keys())})\n?(.*?)\n?```', re.DOTALL
 )
+REASONING_BLOCK_PATTERN = re.compile(
+    '~~~Reasoning:\n*(.*?)\n*~~~Finished reasoning', re.DOTALL
+)
+
+
+class BlockType(Enum):
+    TEXT = "text"
+    CODE = "code"
+    REASONING = "reasoning"
+    MD = "markdown"
 
 
 class CustomLexer(Lexer):
@@ -105,44 +117,94 @@ def has_code_snippet(arg):
     return has_indentation or has_code_block
 
 
-def split_code_blocks(text: str):
-    """Split text containing code blocks into separate text and code blocks.
+def has_overlap(
+    intervals: List[Tuple[int, int]], new_interval: Tuple[int, int]
+) -> bool:
+    new_start, new_end = new_interval
+    for start, end in intervals:
+        if max(new_start, start) <= min(new_end, end):
+            return True
+    return False
+
+
+def parse_content_blocks(text: str):
+    """Split a response text into well defined individual blocks based on the
+    type of each sub-section.
 
     Args:
-        text (str): Input text containing markdown code blocks delimited by triple backticks
-        and optional language specifiers.
+        text (str): Input text containing distinguishable sub-sections like
+        markdown code blocks delimited by triple backticks and optional language specifiers.
 
     Returns:
-        List[Dict[str, str]]: List of dictionaries representing text and code blocks.
+        List[Dict[str, str]]: List of dictionaries representing distinguishable sub-sections.
         Each dictionary has the following structure:
         - For text blocks: {'type': 'text', 'content': str}
+        - For reasoning blocks: {'type': 'reasoning', 'content': str}
         - For code blocks: {'type': 'code', 'language': str, 'content': str}
     """
 
     blocks = []
-    last_end = 0
+    complete_blocks = []
+
+    def _get_matched_intervals():
+        return [block['range'] for block in blocks]
+
+    # find and process reasoning blocks
+    for match in REASONING_BLOCK_PATTERN.finditer(text):
+        start, end = match.span()
+
+        # if not has_overlap(matched_intervals, (start, end)):
+        if not has_overlap(_get_matched_intervals(), (start, end)):
+            blocks.append(
+                {
+                    'type': BlockType.REASONING,
+                    'range': (start, end),
+                    'content': match.group(1).strip(),
+                }
+            )
+
+    # find and process code blocks
     for match in CODE_PATTERN.finditer(text):
+        start, end = match.span()
         language = match.group(1).lower()
         normalized_lang = LANGUAGE_MAPPING[language]
 
-        # add text before code block
-        if match.start() > last_end:
-            blocks.append({'type': 'text', 'content': text[last_end : match.start()]})
-        blocks.append(
-            {
-                'type': 'code',
-                'language': normalized_lang,
-                'content': match.group(2).strip(),
-            }
-        )
+        if not has_overlap(_get_matched_intervals(), (start, end)):
+            blocks.append(
+                {
+                    'type': BlockType.CODE,
+                    'range': (start, end),
+                    'language': normalized_lang,
+                    'content': match.group(2).strip(),
+                }
+            )
 
-        last_end = match.end()
+    # process normal texts between special special blocks
+    blocks = sorted(blocks, key=lambda x: x['range'][0])
+    current_position = 0
+    for block in blocks:
+        start, end = block['range']
+        if current_position < start:
+            complete_blocks.append(
+                {
+                    'type': BlockType.TEXT,
+                    'range': (current_position, start - 1),
+                    'content': text[current_position : start - 1],
+                }
+            )
+        complete_blocks.append(block)
+        current_position = end + 1
 
-    # add remaining text
-    if last_end < len(text):
-        blocks.append({'type': 'text', 'content': text[last_end:]})
+    # add remaining text if any
+    complete_blocks.append(
+        {
+            'type': BlockType.TEXT,
+            'content': text[current_position:],
+            'range': (current_position, len(text)),
+        }
+    )
 
-    return blocks
+    return complete_blocks
 
 
 def get_code_syntax(code, programming_language):
@@ -152,6 +214,19 @@ def get_code_syntax(code, programming_language):
         theme="monokai",
         word_wrap=True,
         background_color="default",
+    )
+
+
+def get_reasoning_block(content: str) -> Panel:
+    """Create a formatted reasoning block with a box."""
+    return Panel(
+        Text(content, style="italic", no_wrap=False),
+        title="[b]🧠 Reasoning[/b]",
+        title_align="left",
+        border_style="bright_blue",
+        padding=(1, 4),
+        style="bright_white on default",
+        expand=True,
     )
 
 
@@ -167,28 +242,26 @@ class RichIOStream(IOStream):
             if isinstance(arg, str):
                 # markdown could be also be neatly formatted but most of the time that's not
                 # what we want (special chars like ### are also needed when generating a md doc)
-                if has_code_snippet(arg):
-                    # Handle potential code snippets differently
+                blocks = parse_content_blocks(arg)
+                # default blocks formatting (no special code | reasoning blocks identified)
+                if len(blocks) == 1 and blocks[0]['type'] == BlockType.TEXT:
+                    processed_args.append(Text.from_ansi(arg))
+                else:
+                    # Handle different block types like code snippets differently
                     # For example, by not converting them with Text.from_ansi
                     # This preserves formatting but does not interpret ANSI codes
-
-                    # use this for code snippets
-                    blocks = split_code_blocks(arg)
                     for block in blocks:
-                        if block['type'] == 'code':
+                        if block['type'] == BlockType.CODE:
                             language = block['language']
                             processed_args.append(f'```{language}')
                             processed_args.append(
                                 get_code_syntax(block['content'], language)
                             )
                             processed_args.append('```')
+                        elif block['type'] == BlockType.REASONING:
+                            processed_args.append(get_reasoning_block(block['content']))
                         else:
                             processed_args.append(block['content'])
-
-                    # processed_args.append(Markdown(arg))
-                else:
-                    # Convert args with ANSI codes into rich Text objects
-                    processed_args.append(Text.from_ansi(arg))
             else:
                 # Non-string arguments are added without modification
                 processed_args.append(arg)

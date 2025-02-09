@@ -146,7 +146,7 @@ setup(
         'idna==3.4',
         'importlib-metadata==6.8.0',
         'Jinja2==3.1.2',
-        'litellm==1.59.7',
+        'litellm==1.59.10',
         'markdown-it-py==3.0.0',
         'MarkupSafe==2.1.3',
         'mccabe==0.7.0',

@@ -8,6 +8,7 @@ from typing import TypedDict, get_type_hints, List, Dict, Any
 from utils import prompt_utils, http_utils
 from config import config
 from clients.oai_llama_online import CitationEnabledOpenAIClient
+from clients.reasoning_models import ReasoningEnabledOpenAIClient
 
 DEFAULT_FILE_LOCATION = '.'
 DEFAULT_REQUEST_TIMEOUT = 300
@@ -466,8 +467,14 @@ def get_agents(names, overwrite_config=None) -> Agents:
         agent_config = agent.llm_config.get("config_list", [{}])[0]
         model_client_cls = agent_config.get("model_client_cls")
         model_name = agent_config.get("model")
-        if model_client_cls == 'CitationEnabledOpenAIClient':
-            agent.register_model_client(model_client_cls=CitationEnabledOpenAIClient)
+        client_class_map = {
+            'CitationEnabledOpenAIClient': CitationEnabledOpenAIClient,
+            'ReasoningEnabledOpenAIClient': ReasoningEnabledOpenAIClient,
+        }
+        if model_client_cls:
+            agent.register_model_client(
+                model_client_cls=client_class_map[model_client_cls]
+            )
             # since we are using a hybrid client extending OpenAIClient which just overrides message_retrieval,
             # after the new client is registered, the custom model_client_cls attribute must be removed
             # otherwise OpenAIWrapper.create will throw an error because it can't handle model_client_cls
