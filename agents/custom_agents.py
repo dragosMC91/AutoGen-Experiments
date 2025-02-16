@@ -14,7 +14,7 @@ DEFAULT_FILE_LOCATION = '.'
 DEFAULT_REQUEST_TIMEOUT = 300
 DEFAULT_SEED = 42
 DEFAULT_TEMPERATURE = 0
-REASONING_MODELS = ['deepseek-r1', 'o1-mini', 'o1-preview']
+REASONING_MODELS = ['deepseek-r1', 'o3-mini', 'o1-preview']
 
 os.environ["llms_config"] = json.dumps(config.get_llms_config())
 
@@ -34,10 +34,9 @@ openai_model_prefix = 'openai/' if http_utils.is_litellm_server_running() else '
 
 class Configs:
     claude_35_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3.5-sonnet"])
-    gpt4_o: List[Dict[str, Any]] = get_config(
+    gemini_2_flash: List[Dict[str, Any]] = get_config(
         [
-            # f"{openai_model_prefix}gpt-4o",
-            f"{openai_model_prefix}gpt-4o-2024-11-20",
+            "openrouter/gemini-2.0-flash",
         ]
     )
     deepseek_r1: List[Dict[str, Any]] = get_config(
@@ -45,9 +44,9 @@ class Configs:
             "deepseek/deepseek-r1",
         ]
     )
-    gpt4_o1: List[Dict[str, Any]] = get_config(
+    o3_mini: List[Dict[str, Any]] = get_config(
         [
-            f"{openai_model_prefix}o1-preview",
+            f"{openai_model_prefix}o3-mini",
         ]
     )
     sonar_r1: List[Dict[str, Any]] = get_config(
@@ -55,14 +54,25 @@ class Configs:
             "openrouter/sonar-r1",
         ]
     )
-    llama_31_sonar_online: List[Dict[str, Any]] = get_config(
-        [
-            "openrouter/llama-3.1-sonar-large-online",
-        ]
-    )
     deepseek_v3: List[Dict[str, Any]] = get_config(
         [
             "deepseek/deepseek-v3",
+        ]
+    )
+    gpt4_o: List[Dict[str, Any]] = get_config(
+        [
+            # f"{openai_model_prefix}gpt-4o",
+            f"{openai_model_prefix}gpt-4o-2024-11-20",
+        ]
+    )
+    gpt4_o1: List[Dict[str, Any]] = get_config(
+        [
+            f"{openai_model_prefix}o1-preview",
+        ]
+    )
+    llama_31_sonar_online: List[Dict[str, Any]] = get_config(
+        [
+            "openrouter/llama-3.1-sonar-large-online",
         ]
     )
     gpt4_turbo: List[Dict[str, Any]] = get_config(
@@ -71,11 +81,6 @@ class Configs:
         ]
     )
     claude_35_haiku: List[Dict[str, Any]] = get_config(["anthropic/claude-3.5-haiku"])
-    gpt4_o1_mini: List[Dict[str, Any]] = get_config(
-        [
-            f"{openai_model_prefix}o1-mini",
-        ]
-    )
     claude_3_opus: List[Dict[str, Any]] = get_config(["anthropic/claude-3-opus"])
     gpt4o_mini: List[Dict[str, Any]] = get_config([f"{openai_model_prefix}gpt-4o-mini"])
     gpt3: List[Dict[str, Any]] = get_config(
@@ -99,6 +104,7 @@ def get_llm_config(specific_config, custom_config=None):
         "timeout": DEFAULT_REQUEST_TIMEOUT,
         "cache_seed": DEFAULT_SEED,  # used for caching
         "config_list": specific_config,
+        # the temperature attribute from specific_config, if set, has precedence over the the temperature from default_config
         "temperature": DEFAULT_TEMPERATURE,
     }
 

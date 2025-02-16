@@ -16,11 +16,12 @@ model_list:
       api_key: os.environ/OPENAI_API_KEY
       api_base: https://api.openai.com/v1
 
-  - model_name: openai/o1-mini
+  - model_name: openai/o3-mini
     litellm_params:
-      model: o1-mini
+      model: o3-mini
       api_key: os.environ/OPENAI_API_KEY
       api_base: https://api.openai.com/v1
+      reasoning_effort: high
 
   - model_name: openai/o1-preview
     litellm_params:
@@ -109,6 +110,13 @@ model_list:
       model: deepseek/deepseek-reasoner
       api_base: https://api.deepseek.com
       api_key: os.environ/DEEPSEEK_API_KEY
+      max_tokens: 4096
+
+  - model_name: openrouter/gemini-2.0-flash
+    litellm_params:
+      model: openrouter/google/gemini-2.0-flash-001
+      # api_base: https://openrouter.ai/api/v1/chat/completions
+      api_key: os.environ/OPENROUTER_API_KEY
       max_tokens: 4096
 
   - model_name: openrouter/llama-3.1-sonar-large-online
