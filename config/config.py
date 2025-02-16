@@ -14,7 +14,7 @@ def get_llms_config():
         {"model": "gpt-4-turbo-2024-04-09", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4o-2024-11-20", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4o-mini", "api_key": os.getenv('OPENAI_API_KEY')},
-        {"model": "o1-mini", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "o3-mini", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o1-preview", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "dall-e-3", "api_key": os.getenv('OPENAI_API_KEY')},
         {
@@ -36,9 +36,9 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
-            "model": "openai/o1-mini",
+            "model": "openai/o3-mini",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
-            "price": [0.003, 0.012],
+            "price": [0.0011, 0.0044],
         },
         {
             "base_url": base_url,
@@ -93,6 +93,12 @@ def get_llms_config():
         # OpenRouter models
         {
             "base_url": base_url,
+            "model": "openrouter/gemini-2.0-flash",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.0001, 0.0004],
+        },
+        {
+            "base_url": base_url,
             "model": "openrouter/llama-3.1-sonar-large-online",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.001, 0.001],
@@ -130,6 +136,7 @@ def get_llms_config():
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.00055, 0.00219],
             "model_client_cls": "ReasoningEnabledOpenAIClient",
+            "temperature": 0.6,
         },
         # Local ollama models
         {
