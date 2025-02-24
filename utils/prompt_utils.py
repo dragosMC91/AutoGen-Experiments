@@ -23,6 +23,7 @@ from rich.progress import (
 )
 
 from autogen.io.base import IOStream
+from autogen.messages.agent_messages import TextMessage
 from typing import List, Tuple, Any
 from enum import Enum
 
@@ -230,43 +231,58 @@ def get_reasoning_block(content: str) -> Panel:
     )
 
 
+def format_agent_conversation_header(sender, receiver, sender_color='#D9E805'):
+    return Text.assemble(
+        "\n", (sender, f'bold {sender_color}'), " to (", (receiver, 'bold'), "):\n\n"
+    )
+
+
 class RichIOStream(IOStream):
     def __init__(self):
         self.console = Console()
 
-    def print(self, *args: Any, **kwargs) -> None:
-        # Remove 'flush' argument if present, as it's not supported by rich.console.Console.print
-        kwargs.pop('flush', None)
-        processed_args = []
-        for arg in args:
-            if isinstance(arg, str):
-                # markdown could be also be neatly formatted but most of the time that's not
-                # what we want (special chars like ### are also needed when generating a md doc)
-                blocks = parse_content_blocks(arg)
-                # default blocks formatting (no special code | reasoning blocks identified)
-                if len(blocks) == 1 and blocks[0]['type'] == BlockType.TEXT:
-                    processed_args.append(Text.from_ansi(arg))
-                else:
-                    # Handle different block types like code snippets differently
-                    # For example, by not converting them with Text.from_ansi
-                    # This preserves formatting but does not interpret ANSI codes
-                    for block in blocks:
-                        if block['type'] == BlockType.CODE:
-                            language = block['language']
-                            processed_args.append(f'```{language}')
-                            processed_args.append(
-                                get_code_syntax(block['content'], language)
-                            )
-                            processed_args.append('```')
-                        elif block['type'] == BlockType.REASONING:
-                            processed_args.append(get_reasoning_block(block['content']))
-                        else:
-                            processed_args.append(block['content'])
-            else:
-                # Non-string arguments are added without modification
-                processed_args.append(arg)
+    def send(self, original_message: Any) -> None:
+        # for most messages we want to display the preset message models except for conversable_agent._print_received_message
+        # where we want to beautify the terminal output
+        if (
+            isinstance(original_message, TextMessage)
+            and original_message.type == 'text'
+        ):
+            message_content = original_message.content
+            message = getattr(message_content, 'content')
+            sender_name = getattr(message_content, 'sender_name')
+            recipient_name = getattr(message_content, 'recipient_name')
+            processed_args = []
+            blocks = parse_content_blocks(message)
 
-        self.console.print(markup=False, *processed_args, **kwargs)
+            if len(blocks) == 1 and blocks[0]['type'] == BlockType.TEXT:
+                processed_args.append(
+                    format_agent_conversation_header(sender_name, recipient_name)
+                )
+                processed_args.append(message)
+                processed_args.append(line_separator)
+            else:
+                processed_args.append(
+                    format_agent_conversation_header(sender_name, recipient_name)
+                )
+                # Handle different block types like code snippets differently
+                # For example, by not converting them with Text.from_ansi
+                # This preserves formatting but does not interpret ANSI codes
+                for block in blocks:
+                    if block['type'] == BlockType.CODE:
+                        language = block['language']
+                        processed_args.append(f'```{language}')
+                        processed_args.append(
+                            get_code_syntax(block['content'], language)
+                        )
+                        processed_args.append('```')
+                    elif block['type'] == BlockType.REASONING:
+                        processed_args.append(get_reasoning_block(block['content']))
+                    else:
+                        processed_args.append(block['content'])
+            self.console.print(markup=False, *processed_args)
+        else:
+            original_message.print()
 
     def input(self, prompt: str = "", *, password: bool = False) -> str:
         return ask_for_prompt_input(prompt)
