@@ -42,7 +42,15 @@ This project is tested with Python `3.11.8`. It is recommended to use this speci
 
 ## Environment Setup
 
-### Using pyenv
+### Using [uv](https://github.com/astral-sh/uv) (*recommended*)
+
+```sh
+uv python install 3.11.8
+uv venv --python 3.11.8
+source .venv/bin/activate
+```
+
+### Using [pyenv](https://github.com/pyenv/pyenv)
 
 If you are using `pyenv`, you can install Python `3.11.8` and set it as the local version for the project using the following commands:
 
@@ -65,15 +73,16 @@ Replace `myenv` with a name of your choice for the environment.
 
 ### Install project dependencies
 
-Once you have the correct version of Python set up, install the project dependencies by running:
+Once you have the correct version of Python set up, install the project dependencies.
+Only add `uv` prefix if you are using this tool.
 
 ```sh
-pip install -e .
+uv pip install -e .
 ```
 
 If you also plan to setup and use the the litellm proxy dashboard UI, which offers neat costs monitoring and usage statistics, install `autogen-experiments[proxy]` extra dependencies via:
 ```sh
-pip install -e '.[proxy]'
+uv pip install -e '.[proxy]'
 ```
 
 Depending on your use cases, you might need other extra dependencies like `autogen-experiments[text-compression]` | `autogen-experiments[rag]` which you can install individually or just install everything via

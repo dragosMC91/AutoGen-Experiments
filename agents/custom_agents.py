@@ -34,10 +34,14 @@ openai_model_prefix = 'openai/' if http_utils.is_litellm_server_running() else '
 
 class Configs:
     claude_35_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3.5-sonnet"])
+    claude_37_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3.7-sonnet"])
     gemini_2_flash: List[Dict[str, Any]] = get_config(
         [
             "openrouter/gemini-2.0-flash",
         ]
+    )
+    claude_37_thinking: List[Dict[str, Any]] = get_config(
+        ["openrouter/claude-3.7-thinking"]
     )
     deepseek_r1: List[Dict[str, Any]] = get_config(
         [
@@ -201,13 +205,13 @@ class Agents(TypedDict):
 
     coder: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="expert_coder",
-        llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
+        llm_config=get_llm_config(custom_config or configs.claude_37_sonnet),
         system_message=coder_system_message,
     )
 
     advanced_assistant: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="advanced_assistant",
-        llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
+        llm_config=get_llm_config(custom_config or configs.claude_37_sonnet),
         system_message="""
             Agent name = advanced_assistant. An advanced helper. You are expected to assist with complex tasks, which may include deep analysis,
             generating sophisticated ideas, solving intricate problems, and more.
@@ -219,7 +223,7 @@ class Agents(TypedDict):
     docker_assistant: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="docker_assistant",
         llm_config=get_llm_config(
-            custom_config or configs.claude_35_sonnet, {"temperature": 0.1}
+            custom_config or configs.claude_37_sonnet, {"temperature": 0.1}
         ),
         system_message="""
             Agent name = docker_assistant. Docker assistant who knows everything about docker
@@ -243,7 +247,7 @@ class Agents(TypedDict):
     github_actions_specialist: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="github_actions_specialist",
         llm_config=get_llm_config(
-            custom_config or configs.claude_35_sonnet, {"temperature": 0.1}
+            custom_config or configs.claude_37_sonnet, {"temperature": 0.1}
         ),
         system_message="""
             Agent name = github_actions_specialist. I am working with GitHub Actions, a powerful automation tool that enables developers to
@@ -262,7 +266,7 @@ class Agents(TypedDict):
 
     task_planner: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="task_planner",
-        llm_config=get_llm_config(custom_config or configs.deepseek_v3),
+        llm_config=get_llm_config(custom_config or configs.claude_37_thinking),
         system_message="""
             Agent name = task_planner. You are an advanced language model whose task is to analyze and restructure user input into a clear, organized format.
             Follow these step:
@@ -292,7 +296,7 @@ class Agents(TypedDict):
 
     basic_assistant: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="basic_assistant",
-        llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
+        llm_config=get_llm_config(custom_config or configs.claude_37_sonnet),
         system_message="""
             Agent name = basic_assistant. A general-purpose assistant helper.
             You are expected to assist with a wide range of tasks, which may include answering questions,
@@ -353,7 +357,7 @@ class Agents(TypedDict):
 
     master_chef: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="master_chef",
-        llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
+        llm_config=get_llm_config(custom_config or configs.claude_37_sonnet),
         system_message="""
             Agent name = master_chef. A highly skilled and creative vegan chef with extensive knowledge of plant-based ingredients and cuisines from around the world.
             This chef is adept at creating nutritious, flavorful, and visually appealing vegan dishes,
@@ -364,7 +368,7 @@ class Agents(TypedDict):
     critic: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="critic",
         llm_config=get_llm_config(
-            custom_config or configs.gpt4_o, {"temperature": 0.1}
+            custom_config or configs.gemini_2_flash, {"temperature": 0.1}
         ),
         system_message="""
             Agent name = critic. Critic AI LLM.
@@ -377,7 +381,7 @@ class Agents(TypedDict):
 
     qa_automation_engineer: autogen.AssistantAgent = lambda custom_config=None: autogen.AssistantAgent(
         name="qa_automation_engineer",
-        llm_config=get_llm_config(custom_config or configs.claude_35_sonnet),
+        llm_config=get_llm_config(custom_config or configs.claude_37_sonnet),
         system_message="""
             Agent name = qa_automation_engineer. QA Automation Engineer LLM:
             Develops and maintains automation frameworks for software testing.
@@ -392,7 +396,7 @@ class Agents(TypedDict):
 
     image_analyst: MultimodalConversableAgent = lambda *args: MultimodalConversableAgent(
         name="image_analyst",
-        llm_config=get_llm_config(configs.claude_35_sonnet, {"temperature": 0.5}),
+        llm_config=get_llm_config(configs.claude_37_sonnet, {"temperature": 0.5}),
         system_message="""
             Agent name = image_analyst. Expert image analyst capable of categorizing all images provided to him.
             """,

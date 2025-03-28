@@ -91,6 +91,13 @@ model_list:
       api_key: os.environ/ANTHROPIC_API_KEY
       max_tokens: 4096
 
+  - model_name: anthropic/claude-3.7-sonnet
+    litellm_params:
+      model: claude-3-7-sonnet-20250219
+      api_base: https://api.anthropic.com/v1/messages
+      api_key: os.environ/ANTHROPIC_API_KEY
+      max_tokens: 4096
+
   - model_name: anthropic/claude-3.5-haiku
     litellm_params:
       model: claude-3-5-haiku-20241022
@@ -112,11 +119,30 @@ model_list:
       api_key: os.environ/DEEPSEEK_API_KEY
       max_tokens: 4096
 
+  - model_name: openrouter/claude-3.7-thinking
+    litellm_params:
+      model: openrouter/anthropic/claude-3.7-sonnet:thinking
+      # api_base: https://api.anthropic.com/v1/messages
+      api_key: os.environ/OPENROUTER_API_KEY
+      max_tokens: 4096
+
   - model_name: openrouter/gemini-2.0-flash
     litellm_params:
       model: openrouter/google/gemini-2.0-flash-001
       # api_base: https://openrouter.ai/api/v1/chat/completions
       api_key: os.environ/OPENROUTER_API_KEY
+      max_tokens: 4096
+
+  - model_name: google/gemini-2.0-flash
+    litellm_params:
+      model: gemini/gemini-2.0-flash
+      api_key: os.environ/GEMINI_API_KEY
+      max_tokens: 4096
+
+  - model_name: google/gemini-2.5-pro-exp-03-25
+    litellm_params:
+      model: gemini/gemini-2.5-pro-exp-03-25
+      api_key: os.environ/GEMINI_API_KEY
       max_tokens: 4096
 
   - model_name: openrouter/llama-3.1-sonar-large-online

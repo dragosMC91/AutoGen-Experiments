@@ -372,9 +372,11 @@ def ask_for_prompt_with_completer(
     @kb.add(Keys.Delete)
     def handle_key_events(event):
         """Handle backspace and delete keys explicitly."""
-        event.app.current_buffer.delete_before_cursor() if event.key_sequence[
-            0
-        ].key == Keys.Backspace else event.app.current_buffer.delete()
+        (
+            event.app.current_buffer.delete_before_cursor()
+            if event.key_sequence[0].key == Keys.Backspace
+            else event.app.current_buffer.delete()
+        )
         refresh_completions(event)
 
     def refresh_completions(event):

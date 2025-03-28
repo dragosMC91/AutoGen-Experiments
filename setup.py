@@ -98,7 +98,7 @@ class CleanupRepo(CustomCommand):
 
 setup(
     name='autogen-experiments',
-    version='0.1.0',
+    version='0.1.1',
     author='dragos',
     author_email='campean_dragos@ymail.com',
     description='An autogen playground for experimenting.',
@@ -163,7 +163,7 @@ setup(
         'pip-tools==7.3.0',
         'platformdirs==3.11.0',
         'prompt-toolkit==3.0.43',
-        'autogen==0.7.4',
+        'ag2==0.7.5',
         'pycodestyle==2.11.1',
         'pycparser==2.21',
         'pydantic==2.10.6',
@@ -212,14 +212,14 @@ setup(
             'opentelemetry-sdk==1.30.0',
         ],
         'text-compression': [
-            'autogen[long-context]',
+            'ag2[long-context]',
             'huggingface-hub==0.26.0',
             'accelerate==1.0.1',
         ],
         # other tool installs which are needed
         # 1. playwright install
         'deep-research': [
-            'autogen[browser-use]',
+            'ag2[browser-use]',
         ],
         'rag': [
             'llama-index==0.11.21',
