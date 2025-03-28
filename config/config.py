@@ -12,7 +12,7 @@ def get_llms_config():
         {"model": "gpt-3.5-turbo-0125", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-3.5-turbo", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4-turbo-2024-04-09", "api_key": os.getenv('OPENAI_API_KEY')},
-        {"model": "gpt-4o-2024-11-20", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "gpt-4o", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4o-mini", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o3-mini", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o1-preview", "api_key": os.getenv('OPENAI_API_KEY')},
@@ -30,7 +30,7 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
-            "model": "openai/gpt-4o-2024-11-20",
+            "model": "openai/gpt-4o",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.0025, 0.010],
         },
@@ -86,9 +86,28 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
+            "model": "anthropic/claude-3.7-sonnet",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.003, 0.015],
+        },
+        {
+            "base_url": base_url,
             "model": "anthropic/claude-3.5-haiku",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.001, 0.005],
+        },
+        # Google models
+        {
+            "base_url": base_url,
+            "model": "google/gemini-2.0-flash",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.0001, 0.0004],
+        },
+        {
+            "base_url": base_url,
+            "model": "google/gemini-2.5-pro",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.0001, 0.0004],
         },
         # OpenRouter models
         {
@@ -96,6 +115,13 @@ def get_llms_config():
             "model": "openrouter/gemini-2.0-flash",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.0001, 0.0004],
+        },
+        {
+            "base_url": base_url,
+            "model": "openrouter/claude-3.7-thinking",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "model_client_cls": "ReasoningEnabledOpenAIClient",
+            "price": [0.0003, 0.0015],
         },
         {
             "base_url": base_url,

@@ -16,7 +16,7 @@ import os
 # don't forget to install the required extra tools via pip install -e '.[text-compression]'
 os.environ['TOKENIZERS_PARALLELISM'] = 'true'
 llm_lingua = LLMLingua()
-text_compressor = TextMessageCompressor(text_compressor=llm_lingua)
+text_compressor = TextMessageCompressor(text_compressor=llm_lingua, min_tokens=500)
 context_handling = transform_messages.TransformMessages(transforms=[text_compressor])
 
 message = """
