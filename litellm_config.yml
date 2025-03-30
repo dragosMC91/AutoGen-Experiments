@@ -16,6 +16,12 @@ model_list:
       api_key: os.environ/OPENAI_API_KEY
       api_base: https://api.openai.com/v1
 
+  - model_name: openai/chatgpt-4o-latest
+    litellm_params:
+      model: openai/chatgpt-4o-latest
+      api_key: os.environ/OPENAI_API_KEY
+      api_base: https://api.openai.com/v1
+
   - model_name: openai/o3-mini
     litellm_params:
       model: o3-mini
