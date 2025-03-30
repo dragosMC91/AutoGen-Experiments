@@ -12,6 +12,7 @@ def get_llms_config():
         {"model": "gpt-3.5-turbo-0125", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-3.5-turbo", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4-turbo-2024-04-09", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "chatgpt-4o-latest", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4o", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4o-mini", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o3-mini", "api_key": os.getenv('OPENAI_API_KEY')},
@@ -27,6 +28,12 @@ def get_llms_config():
             "base_url": base_url,
             "model": "openai/gpt-4-turbo-2024-04-09",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
+        },
+        {
+            "base_url": base_url,
+            "model": "openai/chatgpt-4o-latest",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.005, 0.015],
         },
         {
             "base_url": base_url,

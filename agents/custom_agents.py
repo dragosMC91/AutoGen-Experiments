@@ -33,7 +33,11 @@ openai_model_prefix = 'openai/' if http_utils.is_litellm_server_running() else '
 
 
 class Configs:
-    claude_35_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3.5-sonnet"])
+    chatgpt_4o_latest: List[Dict[str, Any]] = get_config(
+        [
+            f"{openai_model_prefix}chatgpt-4o-latest",
+        ]
+    )
     claude_37_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3.7-sonnet"])
     gemini_2_flash: List[Dict[str, Any]] = get_config(
         [
@@ -43,6 +47,7 @@ class Configs:
     claude_37_thinking: List[Dict[str, Any]] = get_config(
         ["openrouter/claude-3.7-thinking"]
     )
+    claude_35_sonnet: List[Dict[str, Any]] = get_config(["anthropic/claude-3.5-sonnet"])
     deepseek_r1: List[Dict[str, Any]] = get_config(
         [
             "deepseek/deepseek-r1",
