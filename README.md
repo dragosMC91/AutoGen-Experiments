@@ -76,19 +76,23 @@ Replace `myenv` with a name of your choice for the environment.
 Once you have the correct version of Python set up, install the project dependencies.
 Only add `uv` prefix if you are using this tool.
 
+**RECOMMENDED:** Install _all_ dependencies to use all modules (RAG, text compression for large prompts, browser use, etc) within this framework via:
+```sh
+pip install -e '.[all]'
+```
+Or you can just install the core dependencies, and only later install extra dependencies if you really need them.
+
+Core dependencies install:
+
 ```sh
 uv pip install -e .
 ```
 
-If you also plan to setup and use the the litellm proxy dashboard UI, which offers neat costs monitoring and usage statistics, install `autogen-experiments[proxy]` extra dependencies via:
+Extra dependency install example:
 ```sh
 uv pip install -e '.[proxy]'
 ```
-
-Depending on your use cases, you might need other extra dependencies like `autogen-experiments[text-compression]` | `autogen-experiments[rag]` which you can install individually or just install everything via
-```sh
-pip install -e '.[all]'
-```
+For example, this enables usage of the litellm proxy dashboard UI, which offers neat costs monitoring and usage statistics.
 
 ## Configuration
 

@@ -6,7 +6,9 @@ write 2 test cases for the section of the bayut.com website in the following ima
 <img /Users/dragoscampean/Documents/AutoGen-Experiments/dalle_art/1735804805.45574.png>
 """
 
-user_proxy, image_analyst = custom_agents.get_agents(
+agents = custom_agents.AgentFactory()
+
+user_proxy, image_analyst = agents.get_agents(
     names=['user_proxy', 'image_analyst']
 ).values()
 

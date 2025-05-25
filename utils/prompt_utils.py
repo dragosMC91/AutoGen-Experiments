@@ -23,7 +23,7 @@ from rich.progress import (
 )
 
 from autogen.io.base import IOStream
-from autogen.messages.agent_messages import TextMessage
+from autogen.events.agent_events import TextEvent
 from typing import List, Tuple, Any
 from enum import Enum
 
@@ -244,14 +244,11 @@ class RichIOStream(IOStream):
     def send(self, original_message: Any) -> None:
         # for most messages we want to display the preset message models except for conversable_agent._print_received_message
         # where we want to beautify the terminal output
-        if (
-            isinstance(original_message, TextMessage)
-            and original_message.type == 'text'
-        ):
+        if isinstance(original_message, TextEvent) and original_message.type == 'text':
             message_content = original_message.content
             message = getattr(message_content, 'content')
-            sender_name = getattr(message_content, 'sender_name')
-            recipient_name = getattr(message_content, 'recipient_name')
+            sender_name = getattr(message_content, 'sender')
+            recipient_name = getattr(message_content, 'recipient')
             processed_args = []
             blocks = parse_content_blocks(message)
 

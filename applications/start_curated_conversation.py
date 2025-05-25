@@ -10,7 +10,9 @@ assistant_name = prompt_utils.ask_for_prompt_with_completer(
     options=custom_agents.get_agents_options()
 )
 
-assistant, user_proxy, critic, task_planner = custom_agents.get_agents(
+agents = custom_agents.AgentFactory()
+
+assistant, user_proxy, critic, task_planner = agents.get_agents(
     names=[assistant_name, 'user_proxy', 'critic', 'task_planner']
 ).values()
 
@@ -23,7 +25,7 @@ groupchat = autogen.GroupChat(
 
 manager = autogen.GroupChatManager(
     groupchat=groupchat,
-    llm_config=custom_agents.get_llm_config(custom_agents.Configs.deepseek_v3),
+    llm_config=custom_agents.Configs.gemini_25_flash,
     code_execution_config=False,
     system_message="""
     Manage a chat workflow between a task planner, an assistant and a critic.
