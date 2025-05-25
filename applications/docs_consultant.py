@@ -43,7 +43,7 @@ assistant, user_proxy = custom_agents.get_agents(
 ).values()
 
 custom_llm_to_use = prompt_utils.ask_for_prompt_with_completer(
-    prompt=f"Select LLM to use (default is {default_llm[0]['model']}): ",
+    prompt=f"Select LLM to use (default is {default_llm['config_list'][0]['model']}): ",
     options=custom_agents.get_config_options(),
     selection_mandatory=False,
 )

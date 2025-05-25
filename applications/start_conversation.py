@@ -9,9 +9,10 @@ message = """
 assistant_name = prompt_utils.ask_for_prompt_with_completer(
     options=custom_agents.get_agents_options()
 )
-assistant, user_proxy = custom_agents.get_agents(
-    names=[assistant_name, 'user_proxy']
-).values()
+
+agents = custom_agents.AgentFactory()
+
+assistant, user_proxy = agents.get_agents(names=[assistant_name, 'user_proxy']).values()
 
 default_llm = assistant.llm_config["config_list"][0]["model"]
 custom_llm_to_use = prompt_utils.ask_for_prompt_with_completer(
@@ -22,10 +23,10 @@ custom_llm_to_use = prompt_utils.ask_for_prompt_with_completer(
 
 # re-fetch assistant agent with new config is one is selected
 if custom_llm_to_use:
-    assistant = custom_agents.get_agents(
-        names=[assistant_name],
-        overwrite_config=getattr(custom_agents.Configs, custom_llm_to_use),
-    )[assistant_name]
+    assistant = agents.create_agent(
+        name=assistant_name,
+        config=getattr(custom_agents.Configs, custom_llm_to_use),
+    )
 
 # the assistant receives a message from the user, which contains the task description
 user_proxy.initiate_chat(

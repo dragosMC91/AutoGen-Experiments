@@ -7,7 +7,9 @@ import time
 message = """
 """
 
-image_generator = custom_agents.get_agents(names=['image_generator'])["image_generator"]
+agents = custom_agents.AgentFactory()
+
+image_generator = agents.get_agents(names=['image_generator'])["image_generator"]
 
 resolution = prompt_utils.ask_for_prompt_with_completer(
     prompt='Select Resolution (press Tab for options): ',

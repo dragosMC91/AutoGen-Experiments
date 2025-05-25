@@ -22,24 +22,26 @@ context_handling = transform_messages.TransformMessages(transforms=[text_compres
 message = """
 """
 
-# claude was chosen because i found openai models exclude certain results from the response
-default_llm = custom_agents.Configs.claude_35_sonnet
-assistant, user_proxy = custom_agents.get_agents(
+agents = custom_agents.AgentFactory()
+# openai models and sometimes gemini exclude certain results from the response
+# claude is the most reliable here but the most expensive
+default_llm = custom_agents.Configs.gemini_25_pro
+assistant, user_proxy = agents.get_agents(
     names=['advanced_assistant', 'user_proxy'], overwrite_config=default_llm
 ).values()
 
 custom_llm_to_use = prompt_utils.ask_for_prompt_with_completer(
-    prompt=f"Select LLM to use (default is {default_llm[0]['model']}): ",
+    prompt=f"Select LLM to use (default is {default_llm['config_list'][0]['model']}): ",
     options=custom_agents.get_config_options(),
     selection_mandatory=False,
 )
 
 # re-fetch assistant agent with new config is one is selected
 if custom_llm_to_use:
-    assistant = custom_agents.get_agents(
-        names=['advanced_assistant'],
-        overwrite_config=getattr(custom_agents.Configs, custom_llm_to_use),
-    )['advanced_assistant']
+    assistant = agents.create_agent(
+        name='advanced_assistant',
+        config=getattr(custom_agents.Configs, custom_llm_to_use),
+    )
 
 register_function(
     **llm_functions.Functions.get_latest_arxiv_papers,

@@ -12,12 +12,33 @@ def get_llms_config():
         {"model": "gpt-3.5-turbo-0125", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-3.5-turbo", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4-turbo-2024-04-09", "api_key": os.getenv('OPENAI_API_KEY')},
-        {"model": "chatgpt-4o-latest", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4o", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "gpt-4o-mini", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "gpt-4.1", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "chatgpt-4o-latest", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "o3", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o3-mini", "api_key": os.getenv('OPENAI_API_KEY')},
+        {"model": "o4-mini", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "o1-preview", "api_key": os.getenv('OPENAI_API_KEY')},
         {"model": "dall-e-3", "api_key": os.getenv('OPENAI_API_KEY')},
+        {
+            "base_url": base_url,
+            "model": "openai/o3",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.01, 0.04],
+        },
+        {
+            "base_url": base_url,
+            "model": "openai/o4-mini",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00015, 0.0016],
+        },
+        {
+            "base_url": base_url,
+            "model": "openai/gpt-41",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.002, 0.008],
+        },
         {
             "base_url": base_url,
             "model": "openai/o1-preview",
@@ -99,6 +120,25 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
+            "model": "anthropic/claude-sonnet-4",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.003, 0.015],
+        },
+        {
+            "base_url": base_url,
+            "model": "anthropic/claude-sonnet-4-thinking",
+            "model_client_cls": "ReasoningEnabledOpenAIClient",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.003, 0.015],
+        },
+        {
+            "base_url": base_url,
+            "model": "anthropic/claude-opus-4",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.015, 0.075],
+        },
+        {
+            "base_url": base_url,
             "model": "anthropic/claude-3.5-haiku",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.001, 0.005],
@@ -114,7 +154,7 @@ def get_llms_config():
             "base_url": base_url,
             "model": "google/gemini-2.5-pro",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
-            "price": [0.0001, 0.0004],
+            "price": [0.0000, 0.0000],
         },
         # OpenRouter models
         {
@@ -122,6 +162,18 @@ def get_llms_config():
             "model": "openrouter/gemini-2.0-flash",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.0001, 0.0004],
+        },
+        {
+            "base_url": base_url,
+            "model": "openrouter/gemini-2.5-flash",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00015, 0.0006],
+        },
+        {
+            "base_url": base_url,
+            "model": "openrouter/gemini-2.5-pro",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00125, 0.01],
         },
         {
             "base_url": base_url,
@@ -169,7 +221,6 @@ def get_llms_config():
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.00055, 0.00219],
             "model_client_cls": "ReasoningEnabledOpenAIClient",
-            "temperature": 0.6,
         },
         # Local ollama models
         {
