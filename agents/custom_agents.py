@@ -82,6 +82,7 @@ class Configs:
     gemini_25_flash: Dict[str, Any] = get_llm_config(
         configs.where(model="openrouter/gemini-2.5-flash")
     )
+    kimi_k2: Dict[str, Any] = get_llm_config(configs.where(model="openrouter/kimi-k2"))
     gemini_2_flash: Dict[str, Any] = get_llm_config(
         configs.where(model="openrouter/gemini-2.0-flash")
     )

@@ -25,7 +25,7 @@ def get_llms_config():
             "base_url": base_url,
             "model": "openai/o3",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
-            "price": [0.01, 0.04],
+            "price": [0.002, 0.008],
         },
         {
             "base_url": base_url,
@@ -162,6 +162,12 @@ def get_llms_config():
             "model": "openrouter/gemini-2.0-flash",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.0001, 0.0004],
+        },
+        {
+            "base_url": base_url,
+            "model": "openrouter/kimi-k2",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00014, 0.00249],
         },
         {
             "base_url": base_url,
