@@ -91,7 +91,7 @@ class CleanupRepo(CustomCommand):
 
         module.remove_junk_dirs(
             module.find_junk_dirs(
-                '.', ['.cache', '__pycache__', 'autogen_experiments.egg-info']
+                '.', ['.cache', '__pycache__', 'autogen_experiments.egg-info', '.venv']
             )
         )
 
@@ -147,7 +147,8 @@ setup(
         'idna==3.4',
         'importlib-metadata==6.8.0',
         'Jinja2==3.1.2',
-        'litellm==1.71.1',
+        'libtmux==0.46.2',
+        'litellm==1.74.3',
         'markdown-it-py==3.0.0',
         'MarkupSafe==2.1.3',
         'mccabe==0.7.0',
@@ -165,7 +166,7 @@ setup(
         'pip-tools==7.3.0',
         'platformdirs==3.11.0',
         'prompt-toolkit==3.0.43',
-        'ag2==0.8.7',
+        'ag2==0.9.6',
         'pycodestyle==2.11.1',
         'pycparser==2.21',
         'pydantic==2.10.6',
