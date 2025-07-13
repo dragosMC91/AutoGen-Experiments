@@ -139,7 +139,7 @@ def get_config_options():
 
 
 # setup autogen overrides
-autogen.ConversableAgent.generate_oai_reply = prompt_utils.with_progress_bar(
+generate_oai_reply_with_loading = prompt_utils.with_progress_bar(
     description="Fetching LLM response..."
 )(autogen.ConversableAgent.generate_oai_reply)
 prompt_utils.set_custom_IO_overrides()
@@ -238,12 +238,12 @@ class AgentFactory:
 
     def __init__(self):
         self.factories: AgentFactoryMap = {
-            'coder': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'coder': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "expert_coder",
                 llm_config=custom_config or Configs.gpt_41,
                 system_message=coder_system_message,
             ),
-            'advanced_assistant': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'advanced_assistant': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "advanced_assistant",
                 llm_config=custom_config or Configs.gemini_25_pro,
                 system_message="""
@@ -253,7 +253,7 @@ class AgentFactory:
                     You should be able to handle any advanced task passed to you with a high level of expertise.
                     """,
             ),
-            'docker_assistant': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'docker_assistant': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "docker_assistant",
                 llm_config={
                     **(custom_config or Configs.claude_37_sonnet),
@@ -277,7 +277,7 @@ class AgentFactory:
                     from me could enhance the accuracy of your response, please let me know.
                     """,
             ),
-            'github_actions_specialist': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'github_actions_specialist': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "github_actions_specialist",
                 llm_config={
                     **(custom_config or Configs.claude_37_sonnet),
@@ -297,7 +297,7 @@ class AgentFactory:
                     if additional context from my end could lead to a more accurate response, indicate so.
                     """,
             ),
-            'task_planner': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'task_planner': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "task_planner",
                 llm_config=custom_config or Configs.claude_37_thinking,
                 system_message="""
@@ -326,7 +326,7 @@ class AgentFactory:
                     lists, or sections as needed. Ensure all critical information is captured and clearly organized.
                     """,
             ),
-            'basic_assistant': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'basic_assistant': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "basic_assistant",
                 llm_config=custom_config or Configs.o4_mini,
                 system_message="""
@@ -337,7 +337,7 @@ class AgentFactory:
                     You should be able to handle any general task passed to you.
                     """,
             ),
-            'nutritionist': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'nutritionist': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "nutritionist",
                 llm_config=custom_config or Configs.o4_mini,
                 system_message="""
@@ -347,7 +347,7 @@ class AgentFactory:
                     Additionally, you will provide a total count of all the macronutrients in the dish.
                     """,
             ),
-            'prompt_engineer': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'prompt_engineer': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "prompt_engineer",
                 llm_config={
                     **(custom_config or Configs.o3),
@@ -385,7 +385,7 @@ class AgentFactory:
                     Providing feedback and suggestions to users on how to craft effective prompts based on the specific LLM in use.
                     """,
             ),
-            'master_chef': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'master_chef': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "master_chef",
                 llm_config=custom_config or Configs.claude_37_sonnet,
                 system_message="""
@@ -394,7 +394,7 @@ class AgentFactory:
                     and is always up-to-date with the latest trends and innovations in vegan cooking.
                     """,
             ),
-            'critic': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'critic': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "critic",
                 llm_config={
                     **(custom_config or Configs.gemini_25_pro),
@@ -408,7 +408,7 @@ class AgentFactory:
                     Unless there are any specific and relevant suggestions for improvement, reply with 1 word: "DONE", nothing more just "DONE".
                     """,
             ),
-            'qa_automation_engineer': lambda custom_config=None, custom_name=None: autogen.AssistantAgent(
+            'qa_automation_engineer': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "qa_automation_engineer",
                 llm_config=custom_config or Configs.claude_37_sonnet,
                 system_message="""
@@ -422,7 +422,7 @@ class AgentFactory:
                     Collaborates with development teams to ensure software quality throughout all stages of the software development lifecycle.
                     """,
             ),
-            'image_analyst': lambda *args: MultimodalConversableAgent(
+            'image_analyst': lambda *args, **kwargs: MultimodalConversableAgent(
                 name="image_analyst",
                 llm_config={**Configs.claude_37_sonnet, **{"temperature": 0.5}},
                 system_message="""
@@ -430,7 +430,7 @@ class AgentFactory:
                     """,
                 max_consecutive_auto_reply=10,
             ),
-            'image_generator': lambda *args: autogen.ConversableAgent(
+            'image_generator': lambda *args, **kwargs: autogen.ConversableAgent(
                 name="image_generator",
                 llm_config={**Configs.dalle, **{"temperature": 0.7}},
                 system_message="""
@@ -462,7 +462,7 @@ class AgentFactory:
                     Can also execute code written by the other agents.
                     """,
             ),
-            'nocode_user_proxy': lambda *args: autogen.UserProxyAgent(
+            'nocode_user_proxy': lambda *args, **kwargs: autogen.UserProxyAgent(
                 name="nocode_user_proxy",
                 human_input_mode="ALWAYS",
                 max_consecutive_auto_reply=100,
@@ -482,6 +482,13 @@ class AgentFactory:
         agent_config = agent.llm_config.get("config_list", [{}])[0]
         model_client_cls = agent_config.get("model_client_cls")
         model_name = agent_config.get("model")
+        # by default, agents will show the loading animation while fetching the reply.
+        # to disable this, create agents with the flag disabled
+        if kwargs.get('show_loading_animation', True):
+            agent.replace_reply_func(
+                old_reply_func=autogen.ConversableAgent.generate_oai_reply,
+                new_reply_func=generate_oai_reply_with_loading,
+            )
         client_class_map = {
             'CitationEnabledOpenAIClient': CitationEnabledOpenAIClient,
             'ReasoningEnabledOpenAIClient': ReasoningEnabledOpenAIClient,
