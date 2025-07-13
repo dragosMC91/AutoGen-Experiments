@@ -438,12 +438,17 @@ class AgentFactory:
                     """,
                 max_consecutive_auto_reply=3,
             ),
-            'user_proxy': lambda *args: autogen.UserProxyAgent(
+            'user_proxy': lambda custom_config=None, custom_name=None, **kwargs: autogen.UserProxyAgent(
                 name="user_proxy",
-                human_input_mode="ALWAYS",
+                human_input_mode="TERMINATE"
+                if kwargs.get('auto_execute_functions', False)
+                else "ALWAYS",
                 max_consecutive_auto_reply=10,
                 is_termination_msg=lambda x: bool(
-                    x.get('content') and str(x['content']).strip().endswith("TERMINATE")
+                    not x.get('tool_calls')
+                    if kwargs.get('auto_execute_functions', False)
+                    else x.get('content')
+                    and str(x['content']).strip().endswith("TERMINATE")
                 ),
                 code_execution_config={
                     "work_dir": "generated_content",
@@ -473,7 +478,7 @@ class AgentFactory:
         }
 
     # extra initialization rules for agents
-    def _init_agent(self, agent: autogen.AssistantAgent):
+    def _init_agent(self, agent: autogen.AssistantAgent, **kwargs):
         agent_config = agent.llm_config.get("config_list", [{}])[0]
         model_client_cls = agent_config.get("model_client_cls")
         model_name = agent_config.get("model")
@@ -519,12 +524,12 @@ class AgentFactory:
         return agents
 
     def create_agent(
-        self, name: str, config, custom_name=None
+        self, name: str, config, custom_name=None, **kwargs
     ) -> autogen.AssistantAgent:
         if name not in self.factories:
             raise ValueError(f"Unknown agent name: {name}")
-        agent = self.factories[name](config, custom_name)
-        self._init_agent(agent)
+        agent = self.factories[name](config, custom_name, **kwargs)
+        self._init_agent(agent, **kwargs)
         return agent
 
 
