@@ -208,6 +208,25 @@ def parse_content_blocks(text: str):
     return complete_blocks
 
 
+def create_renderable_blocks(unformatted_blocks):
+    """Handle different block types like code snippets differently
+    For example, by not converting them with Text.from_ansi
+    This preserves formatting but does not interpret ANSI codes
+    """
+    renderable_blocks = []
+    for block in unformatted_blocks:
+        if block['type'] == BlockType.CODE:
+            language = block['language']
+            renderable_blocks.append(f'```{language}')
+            renderable_blocks.append(get_code_syntax(block['content'], language))
+            renderable_blocks.append('```')
+        elif block['type'] == BlockType.REASONING:
+            renderable_blocks.append(get_reasoning_block(block['content']))
+        else:
+            renderable_blocks.append(block['content'])
+    return renderable_blocks
+
+
 def get_code_syntax(code, programming_language):
     return Syntax(
         code,
@@ -262,21 +281,7 @@ class RichIOStream(IOStream):
                 processed_args.append(
                     format_agent_conversation_header(sender_name, recipient_name)
                 )
-                # Handle different block types like code snippets differently
-                # For example, by not converting them with Text.from_ansi
-                # This preserves formatting but does not interpret ANSI codes
-                for block in blocks:
-                    if block['type'] == BlockType.CODE:
-                        language = block['language']
-                        processed_args.append(f'```{language}')
-                        processed_args.append(
-                            get_code_syntax(block['content'], language)
-                        )
-                        processed_args.append('```')
-                    elif block['type'] == BlockType.REASONING:
-                        processed_args.append(get_reasoning_block(block['content']))
-                    else:
-                        processed_args.append(block['content'])
+                processed_args += create_renderable_blocks(blocks)
             self.console.print(markup=False, *processed_args)
         else:
             original_message.print()
