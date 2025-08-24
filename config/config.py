@@ -29,6 +29,18 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
+            "model": "openai/gpt-5",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00125, 0.01],
+        },
+        {
+            "base_url": base_url,
+            "model": "openai/gpt-5-mini",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00025, 0.002],
+        },
+        {
+            "base_url": base_url,
             "model": "openai/o4-mini",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.00015, 0.0016],
@@ -157,6 +169,12 @@ def get_llms_config():
             "price": [0.0000, 0.0000],
         },
         # OpenRouter models
+        {
+            "base_url": base_url,
+            "model": "openrouter/gpt-5",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.00125, 0.01],
+        },
         {
             "base_url": base_url,
             "model": "openrouter/gemini-2.0-flash",

@@ -58,12 +58,16 @@ openai_model_prefix = 'openai/' if http_utils.is_litellm_server_running() else '
 
 class Configs:
     configs = autogen.LLMConfig.from_json(env="llms_config")
+    gpt_5: Dict[str, Any] = get_llm_config(
+        configs.where(model=f"{openai_model_prefix}gpt-5")
+    )
     gemini_25_pro: Dict[str, Any] = get_llm_config(
         configs.where(model="openrouter/gemini-2.5-pro")
     )
     claude_4_sonnet: Dict[str, Any] = get_llm_config(
         configs.where(model="anthropic/claude-sonnet-4")
     )
+    or_gpt_5: Dict[str, Any] = get_llm_config(configs.where(model="openrouter/gpt-5"))
     claude_4_sonnet_thinking: Dict[str, Any] = get_llm_config(
         configs=configs.where(model="anthropic/claude-sonnet-4-thinking"),
         # anthropic requires specific params for thinking models
@@ -74,6 +78,9 @@ class Configs:
     )
     o4_mini: Dict[str, Any] = get_llm_config(
         configs.where(model=f"{openai_model_prefix}o4-mini")
+    )
+    gpt_5_mini: Dict[str, Any] = get_llm_config(
+        configs.where(model=f"{openai_model_prefix}gpt-5-mini")
     )
     o3: Dict[str, Any] = get_llm_config(configs.where(model=f"{openai_model_prefix}o3"))
     chatgpt_4o_latest: Dict[str, Any] = get_llm_config(
@@ -246,7 +253,7 @@ class AgentFactory:
             ),
             'advanced_assistant': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "advanced_assistant",
-                llm_config=custom_config or Configs.gemini_25_pro,
+                llm_config=custom_config or Configs.gpt_5,
                 system_message="""
                     Agent name = advanced_assistant. An advanced helper. You are expected to assist with complex tasks, which may include deep analysis,
                     generating sophisticated ideas, solving intricate problems, and more.
@@ -398,7 +405,7 @@ class AgentFactory:
             'critic': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
                 name=custom_name or "critic",
                 llm_config={
-                    **(custom_config or Configs.gemini_25_pro),
+                    **(custom_config or Configs.gpt_5),
                     **{"temperature": 0.1},
                 },
                 system_message="""

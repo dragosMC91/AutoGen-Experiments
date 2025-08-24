@@ -34,7 +34,7 @@ This section provides instructions on how to set up your development environment
 
 ## Prerequisites
 
-Before you begin, ensure you have either `pyenv` or `conda` installed on your system to manage Python versions and environments.
+Before you begin, ensure you have either `uv` (recommended) | `pyenv` | `conda` installed on your system to manage Python versions and environments.
 
 ## Python Version
 
@@ -78,7 +78,7 @@ Only add `uv` prefix if you are using this tool.
 
 **RECOMMENDED:** Install _all_ dependencies to use all modules (RAG, text compression for large prompts, browser use, etc) within this framework via:
 ```sh
-pip install -e '.[all]'
+uv pip install -e '.[all]'
 ```
 Or you can just install the core dependencies, and only later install extra dependencies if you really need them.
 
