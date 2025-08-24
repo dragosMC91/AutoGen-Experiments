@@ -148,7 +148,7 @@ setup(
         'importlib-metadata==6.8.0',
         'Jinja2==3.1.2',
         'libtmux==0.46.2',
-        'litellm==1.74.3',
+        'litellm==1.75.2',
         'markdown-it-py==3.0.0',
         'MarkupSafe==2.1.3',
         'mccabe==0.7.0',

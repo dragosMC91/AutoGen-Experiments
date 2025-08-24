@@ -35,7 +35,7 @@ user_proxy = factory.create_agent(
 taskmaster_agent = factory.create_agent(
     name="advanced_assistant",
     custom_name='taskmaster_agent',
-    config=custom_agents.Configs.gemini_25_pro,
+    config=custom_agents.Configs.gpt_5,
 )
 
 taskmaster_agent.update_system_message(
@@ -78,7 +78,7 @@ evaluator_agent.update_system_message(
 assistant_1 = factory.create_agent(
     name=assistant_name,
     custom_name='assistant_1',
-    config=custom_agents.Configs.o3,
+    config=custom_agents.Configs.gpt_5,
     show_loading_animation=False,
 )
 assistant_2 = factory.create_agent(
