@@ -28,6 +28,9 @@ Input:
 Output:
 ![Example Terminal Output](docs/llm_terminal_response.jpg)
 
+For reasoning model it shows the COT separately:
+![Example Terminal Output for COT model response](docs/reasoning_model_response.jpg)
+
 ## Getting Started
 
 This section provides instructions on how to set up your development environment for working on this project.

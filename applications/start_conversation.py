@@ -1,5 +1,4 @@
 # a simple 2 way conversation between a human and an AI agent
-# from agents import custom_agents_old as custom_agents
 from agents import custom_agents
 from utils import prompt_utils
 
