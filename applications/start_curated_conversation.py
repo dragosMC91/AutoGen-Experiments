@@ -1,7 +1,6 @@
 # a group conversation between a human -> an AI agent -> AI critic
 from agents import custom_agents
 from utils import prompt_utils
-import autogen
 
 message = """
 """
@@ -16,16 +15,16 @@ assistant, user_proxy, critic, task_planner = agents.get_agents(
     names=[assistant_name, 'user_proxy', 'critic', 'task_planner']
 ).values()
 
-groupchat = autogen.GroupChat(
+groupchat = custom_agents.get_autogen().GroupChat(
     agents=[user_proxy, task_planner, assistant, critic],
     messages=[],
     speaker_selection_method="round_robin",
     max_round=20,
 )
 
-manager = autogen.GroupChatManager(
+manager = custom_agents.get_autogen().GroupChatManager(
     groupchat=groupchat,
-    llm_config=custom_agents.Configs.gemini_25_flash,
+    llm_config=custom_agents.Configs().gemini_25_flash,
     code_execution_config=False,
     system_message="""
     Manage a chat workflow between a task planner, an assistant and a critic.

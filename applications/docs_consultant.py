@@ -37,14 +37,14 @@ def get_query_engine():
 query_engine = get_query_engine()
 
 # claude main assistant + openai llamaindex assistant yield good results
-default_llm = custom_agents.Configs.claude_35_sonnet
+default_llm = custom_agents.Configs().claude_45_sonnet
 assistant, user_proxy = custom_agents.get_agents(
     names=['advanced_assistant', 'user_proxy'], overwrite_config=default_llm
 ).values()
 
 custom_llm_to_use = prompt_utils.ask_for_prompt_with_completer(
     prompt=f"Select LLM to use (default is {default_llm['config_list'][0]['model']}): ",
-    options=custom_agents.get_config_options(),
+    options=custom_agents.Configs.get_available_LLM_names(),
     selection_mandatory=False,
 )
 
@@ -52,7 +52,7 @@ custom_llm_to_use = prompt_utils.ask_for_prompt_with_completer(
 if custom_llm_to_use:
     assistant = custom_agents.get_agents(
         names=['advanced_assistant'],
-        overwrite_config=getattr(custom_agents.Configs, custom_llm_to_use),
+        overwrite_config=getattr(custom_agents.Configs(), custom_llm_to_use),
     )['advanced_assistant']
 
 

@@ -1,6 +1,5 @@
 from agents import custom_agents
 from utils import prompt_utils
-from autogen.agentchat.contrib.capabilities import generate_images
 import os
 import time
 
@@ -8,8 +7,6 @@ message = """
 """
 
 agents = custom_agents.AgentFactory()
-
-image_generator = agents.get_agents(names=['image_generator'])["image_generator"]
 
 resolution = prompt_utils.ask_for_prompt_with_completer(
     prompt='Select Resolution (press Tab for options): ',
@@ -20,6 +17,11 @@ quality = prompt_utils.ask_for_prompt_with_completer(
 )
 image_path = f"{os.getcwd()}/dalle_art/{time.time()}.png"
 image_description = prompt_utils.get_initial_prompt()
+
+image_generator = agents.get_agents(names=['image_generator'])["image_generator"]
+
+if True:
+    from autogen.agentchat.contrib.capabilities import generate_images
 
 generator = generate_images.DalleImageGenerator(
     image_generator.llm_config, resolution=resolution, quality=quality, num_images=1

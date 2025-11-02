@@ -1,5 +1,4 @@
 from agents import custom_agents
-import autogen
 from utils import prompt_utils
 
 message = """
@@ -11,16 +10,16 @@ nutritionist, user_proxy, master_chef = agents.get_agents(
     names=['nutritionist', 'user_proxy', 'master_chef']
 ).values()
 
-groupchat = autogen.GroupChat(
+groupchat = custom_agents.get_autogen().GroupChat(
     agents=[user_proxy, master_chef, nutritionist],
     messages=[],
     speaker_selection_method="round_robin",
     max_round=10,
 )
 
-manager = autogen.GroupChatManager(
+manager = custom_agents.get_autogen().GroupChatManager(
     groupchat=groupchat,
-    llm_config=custom_agents.Configs.gemini_25_flash,
+    llm_config=custom_agents.Configs().gemini_25_flash,
     system_message="""
     Manage a chat workflow between a chef and a nutritionist.
     Any task will follow this flow:

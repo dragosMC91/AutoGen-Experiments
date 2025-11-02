@@ -1,10 +1,8 @@
 import concurrent.futures
-
 from agents import custom_agents
+from agents.custom_agents import get_autogen, get_autogen_message_transformers
 from utils import prompt_utils
 from typing import Annotated
-from autogen.agentchat.group import ContextVariables
-from autogen import register_function, ConversableAgent
 from rich import print
 from rich.table import Table
 from rich.console import Group
@@ -15,7 +13,10 @@ from rich.live import Live
 from rich.panel import Panel
 from rich.spinner import Spinner
 from rich.text import Text
+from typing import TYPE_CHECKING
 
+if TYPE_CHECKING:
+    from autogen import ConversableAgent
 # relevant resources:
 # https://docs.ag2.ai/docs/user-guide/advanced-concepts/pattern-cookbook/redundant
 # https://docs.ag2.ai/latest/docs/use-cases/notebooks/notebooks/run_and_event_processing/#sequential-run
@@ -26,16 +27,16 @@ assistant_name = prompt_utils.ask_for_prompt_with_completer(
 )
 
 factory = custom_agents.AgentFactory()
-
+configs = custom_agents.Configs()
 user_proxy = factory.create_agent(
     name="user_proxy",
-    config=custom_agents.Configs.gemini_25_flash,
+    config=configs.gemini_25_flash,
     auto_execute_functions=True,
 )
 taskmaster_agent = factory.create_agent(
     name="advanced_assistant",
     custom_name='taskmaster_agent',
-    config=custom_agents.Configs.gpt_5,
+    config=configs.grok_4_fast,
 )
 
 taskmaster_agent.update_system_message(
@@ -61,7 +62,7 @@ taskmaster_agent.update_system_message(
 evaluator_agent = factory.create_agent(
     name="advanced_assistant",
     custom_name='evaluator_agent',
-    config=custom_agents.Configs.gemini_25_pro,
+    config=configs.gemini_25_pro,
 )
 evaluator_agent.update_system_message(
     """You are the Evaluator Agent responsible for assessing multiple approaches to the same task and selecting or synthesizing the best result.
@@ -78,19 +79,19 @@ evaluator_agent.update_system_message(
 assistant_1 = factory.create_agent(
     name=assistant_name,
     custom_name='assistant_1',
-    config=custom_agents.Configs.gpt_5,
+    config=configs.or_gpt_5,
     show_loading_animation=False,
 )
 assistant_2 = factory.create_agent(
     name=assistant_name,
     custom_name='assistant_2',
-    config=custom_agents.Configs.gemini_25_pro,
+    config=configs.gemini_25_pro,
     show_loading_animation=False,
 )
 assistant_3 = factory.create_agent(
     name=assistant_name,
     custom_name='assistant_3',
-    config=custom_agents.Configs.claude_4_sonnet,
+    config=configs.claude_45_sonnet,
     show_loading_animation=False,
 )
 
@@ -101,7 +102,7 @@ assistant_3.silent = True
 
 # Shared context for tracking important conversation attributes and redundant agent
 # results (shared_context not included in the context window but agents can access it)
-shared_context = ContextVariables(
+shared_context = custom_agents.get_ContextVariables()(
     data={
         # Process state
         "task_initiated": False,
@@ -174,7 +175,7 @@ redundant_agents = [assistant_1, assistant_2, assistant_3]
 assistant_names = list(map(lambda x: x.name, redundant_agents))
 
 
-def ask_agent(agent: ConversableAgent, task: str):
+def ask_agent(agent: "ConversableAgent", task: str):
     agent_response = agent.run(
         message=task,
         max_turns=1,
@@ -182,8 +183,8 @@ def ask_agent(agent: ConversableAgent, task: str):
     agent_response.process()
 
     message = agent_response.messages[1]["content"]
-    blocks = prompt_utils.parse_content_blocks(message)
-    return prompt_utils.create_renderable_blocks(blocks)
+    blocks = get_autogen_message_transformers().parse_content_blocks(message)
+    return get_autogen_message_transformers().create_renderable_blocks(blocks)
 
 
 def ask_agents(
@@ -192,9 +193,8 @@ def ask_agents(
         "The task to be processed by multiple agents - needs to be self contained, each task must make sense by itself",
     ],
 ) -> str:
-    """
-    Initiate processing of a task across multiple redundant agents with different approaches
-    """
+    """Initiate processing of a task across multiple redundant agents with
+    different approaches."""
     console = Console()
     layout = make_layout()
     layout_names = ["left", "middle", "right"]
@@ -274,11 +274,11 @@ def evaluate_and_select(
     selection_rationale: Annotated[
         str, "Explanation for why this result was selected or how it was synthesized"
     ],
-    context_variables: ContextVariables,
+    # context_variables: ContextVariables,
+    context_variables: custom_agents.get_ContextVariables(),
 ) -> None:
-    """
-    Evaluate the different approaches and select or synthesize the best result
-    """
+    """Evaluate the different approaches and select or synthesize the best
+    result."""
     # Create scores dictionary from individual parameters
     scores = {"assistant_1": score_a, "assistant_2": score_b, "assistant_3": score_c}
 
@@ -299,14 +299,14 @@ def evaluate_and_select(
     print(f"Evaluation complete. Selected result: {selection_rationale[:100]}...")
 
 
-register_function(
+get_autogen().register_function(
     caller=taskmaster_agent,
     executor=user_proxy,
     f=ask_agents,
     name="ask_agents",
     description="Initiate processing of a task across multiple redundant agents with different approaches - each task is self contained, and must make sense by itself.",
 )
-register_function(
+get_autogen().register_function(
     caller=evaluator_agent,
     executor=user_proxy,
     f=evaluate_and_select,

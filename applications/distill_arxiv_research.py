@@ -6,11 +6,32 @@
 # then you can ask the agent to follow up on a particular paper you want to go more in depth for
 from agents import custom_agents
 from utils import prompt_utils, llm_functions
-from autogen import register_function
-from autogen.agentchat.contrib.capabilities import transform_messages
-from autogen.agentchat.contrib.capabilities.text_compressors import LLMLingua
-from autogen.agentchat.contrib.capabilities.transforms import TextMessageCompressor
 import os
+
+agents = custom_agents.AgentFactory()
+configs = custom_agents.Configs()
+
+# openai models and sometimes gemini exclude certain results from the response
+# claude is the most reliable here but the most expensive
+custom_llm_to_use = prompt_utils.ask_for_prompt_with_completer(
+    prompt="Select LLM to use for the summary assistant: ",
+    options=configs.get_available_LLM_names(),
+    selection_mandatory=False,
+)
+
+assistant = agents.create_agent(
+    name='advanced_assistant',
+    config=getattr(configs, custom_llm_to_use),
+)
+user_proxy = agents.create_agent(name='user_proxy')
+
+# alternative hack to "flake8: noqa: E402" each import in this block
+# which is needed to avoid flake8 errors when importing here instead of
+# top level of the file (to maintain lazy loading)
+if True:
+    from autogen.agentchat.contrib.capabilities import transform_messages
+    from autogen.agentchat.contrib.capabilities.text_compressors import LLMLingua
+    from autogen.agentchat.contrib.capabilities.transforms import TextMessageCompressor
 
 # since arxiv workflow parses large prompts, LLMLingua is used for compression
 # don't forget to install the required extra tools via pip install -e '.[text-compression]'
@@ -19,36 +40,12 @@ llm_lingua = LLMLingua()
 text_compressor = TextMessageCompressor(text_compressor=llm_lingua, min_tokens=500)
 context_handling = transform_messages.TransformMessages(transforms=[text_compressor])
 
-message = """
-"""
-
-agents = custom_agents.AgentFactory()
-# openai models and sometimes gemini exclude certain results from the response
-# claude is the most reliable here but the most expensive
-default_llm = custom_agents.Configs.gemini_25_pro
-assistant, user_proxy = agents.get_agents(
-    names=['advanced_assistant', 'user_proxy'], overwrite_config=default_llm
-).values()
-
-custom_llm_to_use = prompt_utils.ask_for_prompt_with_completer(
-    prompt=f"Select LLM to use (default is {default_llm['config_list'][0]['model']}): ",
-    options=custom_agents.get_config_options(),
-    selection_mandatory=False,
-)
-
-# re-fetch assistant agent with new config is one is selected
-if custom_llm_to_use:
-    assistant = agents.create_agent(
-        name='advanced_assistant',
-        config=getattr(custom_agents.Configs, custom_llm_to_use),
-    )
-
-register_function(
+custom_agents.get_autogen().register_function(
     **llm_functions.Functions.get_latest_arxiv_papers,
     caller=assistant,
     executor=user_proxy,
 )
-register_function(
+custom_agents.get_autogen().register_function(
     **llm_functions.Functions.get_arxiv_article_content,
     caller=assistant,
     executor=user_proxy,
@@ -58,5 +55,5 @@ context_handling.add_to_agent(assistant)
 
 result = user_proxy.initiate_chat(
     assistant,
-    message=prompt_utils.get_initial_prompt(message),
+    message=prompt_utils.get_initial_prompt(),
 )

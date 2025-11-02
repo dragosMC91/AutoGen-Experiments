@@ -1,21 +1,25 @@
-from rich.console import Console
+# Fast imports - only lightweight modules
+import json
+import os
+import threading
+from typing import (
+    TypedDict,
+    List,
+    Union,
+    Dict,
+    Any,
+    Callable,
+    TYPE_CHECKING,
+)
 
-console = Console()
-
-with console.status(
-    "[bold green]Initializing AI conversation framework, please wait...", spinner="dots"
-) as status:
-    from autogen.agentchat.contrib.multimodal_conversable_agent import (
-        MultimodalConversableAgent,
-    )
+# TYPE_CHECKING is set to False when the file is imported
+# so that the import is not blocked by the import of autogen
+# it's only true during static type checking (when IDE analyzes the code)
+# and is strictly necessary for autocomplete in IDE here
+if TYPE_CHECKING:
+    from autogen import AssistantAgent, UserProxyAgent, LLMConfig
+    from autogen.agentchat.group import ContextVariables
     import autogen
-    import json
-    import os
-    from typing import TypedDict, get_type_hints, List, Dict, Any, Callable, Union
-    from utils import prompt_utils, http_utils
-    from config import config
-    from clients.oai_llama_online import CitationEnabledOpenAIClient
-    from clients.reasoning_models import ReasoningEnabledOpenAIClient
 
 DEFAULT_FILE_LOCATION = '.'
 DEFAULT_REQUEST_TIMEOUT = 300
@@ -23,21 +27,170 @@ DEFAULT_SEED = 42
 DEFAULT_TEMPERATURE = 0
 REASONING_MODELS = ['deepseek-r1', 'o3-mini', 'o1-preview', 'o3']
 
-os.environ["llms_config"] = json.dumps(config.get_llms_config())
+# Lazy-loaded globals
+_autogen = None
+_prompt_utils = None
+_autogen_message_transformers = None
+_http_utils = None
+_config = None
+_CitationEnabledOpenAIClient = None
+_ReasoningEnabledOpenAIClient = None
+_MultimodalConversableAgent = None
+_openai_model_prefix = None
+
+# Threading control
+_initialized = False
+_import_thread = None
+_import_complete = threading.Event()
+_import_lock = threading.Lock()
 
 
-def get_llms_config_lists(models: List[Dict[str, Any]]):
-    return autogen.config_list_from_json(
-        env_or_file='llms_config',
-        filter_dict={
-            "model": models,
-        },
-    )
+def _lazy_import():
+    """Lazy import of heavy dependencies.
+
+    Called automatically when needed. All modules including those which
+    use autogen lib, should be included here.
+    """
+    global _autogen, _prompt_utils, _http_utils, _config, _autogen_message_transformers
+    global _CitationEnabledOpenAIClient, _ReasoningEnabledOpenAIClient
+    global _MultimodalConversableAgent, _initialized
+
+    with _import_lock:
+        if _initialized:
+            return
+
+        try:
+            import autogen as autogen_module
+            from utils import (
+                prompt_utils as pu,
+                http_utils as hu,
+                autogen_message_transformers as amt,
+            )
+            from config import config as cfg
+            from clients.oai_llama_online import CitationEnabledOpenAIClient as CEOAI
+            from clients.reasoning_models import ReasoningEnabledOpenAIClient as REOAI
+            from autogen.agentchat.contrib.multimodal_conversable_agent import (
+                MultimodalConversableAgent as MCA,
+            )
+
+            _autogen = autogen_module
+            _prompt_utils = pu
+            _http_utils = hu
+            _autogen_message_transformers = amt
+            _config = cfg
+            _CitationEnabledOpenAIClient = CEOAI
+            _ReasoningEnabledOpenAIClient = REOAI
+            _MultimodalConversableAgent = MCA
+
+            # Set environment variable
+            os.environ["llms_config"] = json.dumps(cfg.get_llms_config())
+
+            _initialized = True
+        finally:
+            # Signal that import is complete
+            _import_complete.set()
 
 
-def get_llm_config(
-    configs: Union[autogen.LLMConfig, dict[str, Any]], custom_config=None
-):
+def _start_background_import():
+    """Start the import process in a background thread."""
+    global _import_thread
+
+    if _import_thread is None:
+        _import_thread = threading.Thread(target=_lazy_import, daemon=True)
+        _import_thread.start()
+
+
+# We can start the background import of slow modules as soon as possible
+# for a better perceived user experience in the terminal
+_start_background_import()
+
+
+def ensure_imports():
+    """Ensure imports are complete.
+
+    Blocks if background import is still running. Shows loading status
+    to user during the wait. Call this before accessing any lazy-loaded
+    module.
+    """
+    if not _initialized:
+        # Show loading status while waiting
+        try:
+            from rich.console import Console
+
+            console = Console()
+            status = console.status(
+                "[bold green]Initializing AI conversation framework...", spinner="dots"
+            )
+            status.start()
+        except:
+            console = None
+            status = None
+
+        try:
+            # Wait for background import to complete
+            _import_complete.wait()
+        finally:
+            if status:
+                status.stop()
+
+
+# some of the module getters private, since they are only used internally
+# others are public, which are needed/used in agent scripts
+def get_autogen() -> "autogen":
+    """Get autogen module, importing if necessary."""
+    if _autogen is None:
+        ensure_imports()
+    return _autogen
+
+
+def get_ContextVariables() -> "ContextVariables":
+    """Get ContextVariables class, ensuring imports are complete."""
+    get_autogen()
+    from autogen.agentchat.group import ContextVariables
+
+    return ContextVariables
+
+
+def _get_prompt_utils():
+    """Get prompt_utils module, importing if necessary."""
+    if _prompt_utils is None:
+        ensure_imports()
+    return _prompt_utils
+
+
+def _get_http_utils():
+    """Get http_utils module, importing if necessary."""
+    if _http_utils is None:
+        ensure_imports()
+    return _http_utils
+
+
+def get_autogen_message_transformers():
+    """Get autogen_message_transformers module, importing if necessary."""
+    if _autogen_message_transformers is None:
+        ensure_imports()
+    return _autogen_message_transformers
+
+
+def _get_openai_model_prefix():
+    """Get openai model prefix, lazy evaluation."""
+    global _openai_model_prefix
+    if _openai_model_prefix is None:
+        http_utils = _get_http_utils()
+        _openai_model_prefix = (
+            'openai/' if http_utils.is_litellm_server_running() else ''
+        )
+    return _openai_model_prefix
+
+
+def get_llm_config(configs: Union["LLMConfig", dict[str, Any]], custom_config=None):
+    """Get LLM configuration with defaults.
+
+    Args:
+        configs: Either an autogen.LLMConfig instance or a dict
+        custom_config: Optional custom configuration overrides
+    """
+    autogen = get_autogen()
     default_config = {
         "timeout": DEFAULT_REQUEST_TIMEOUT,
         "cache_seed": DEFAULT_SEED,  # used for caching queries
@@ -52,105 +205,295 @@ def get_llm_config(
     return default_config
 
 
-# if LiteLLM server is started, route all traffic through that proxy server
-openai_model_prefix = 'openai/' if http_utils.is_litellm_server_running() else ''
-
-
 class Configs:
-    configs = autogen.LLMConfig.from_json(env="llms_config")
-    gpt_5: Dict[str, Any] = get_llm_config(
-        configs.where(model=f"{openai_model_prefix}gpt-5")
-    )
-    gemini_25_pro: Dict[str, Any] = get_llm_config(
-        configs.where(model="openrouter/gemini-2.5-pro")
-    )
-    claude_4_sonnet: Dict[str, Any] = get_llm_config(
-        configs.where(model="anthropic/claude-sonnet-4")
-    )
-    or_gpt_5: Dict[str, Any] = get_llm_config(configs.where(model="openrouter/gpt-5"))
-    claude_4_sonnet_thinking: Dict[str, Any] = get_llm_config(
-        configs=configs.where(model="anthropic/claude-sonnet-4-thinking"),
-        # anthropic requires specific params for thinking models
-        custom_config={"temperature": 1},
-    )
-    gpt_41: Dict[str, Any] = get_llm_config(
-        configs.where(model=f"{openai_model_prefix}gpt-41")
-    )
-    o4_mini: Dict[str, Any] = get_llm_config(
-        configs.where(model=f"{openai_model_prefix}o4-mini")
-    )
-    gpt_5_mini: Dict[str, Any] = get_llm_config(
-        configs.where(model=f"{openai_model_prefix}gpt-5-mini")
-    )
-    o3: Dict[str, Any] = get_llm_config(configs.where(model=f"{openai_model_prefix}o3"))
-    chatgpt_4o_latest: Dict[str, Any] = get_llm_config(
-        configs.where(model=f"{openai_model_prefix}chatgpt-4o-latest")
-    )
-    gemini_25_flash: Dict[str, Any] = get_llm_config(
-        configs.where(model="openrouter/gemini-2.5-flash")
-    )
-    kimi_k2: Dict[str, Any] = get_llm_config(configs.where(model="openrouter/kimi-k2"))
-    gemini_2_flash: Dict[str, Any] = get_llm_config(
-        configs.where(model="openrouter/gemini-2.0-flash")
-    )
-    claude_37_sonnet: Dict[str, Any] = get_llm_config(
-        configs.where(model="anthropic/claude-3.7-sonnet")
-    )
-    claude_37_thinking: Dict[str, Any] = get_llm_config(
-        configs.where(model="openrouter/claude-3.7-thinking")
-    )
-    claude_35_sonnet: Dict[str, Any] = get_llm_config(
-        configs.where(model="anthropic/claude-3.5-sonnet")
-    )
-    deepseek_r1: Dict[str, Any] = get_llm_config(
-        configs.where(model="deepseek/deepseek-r1"),
-        {"temperature": 0.6},
-    )
-    o3_mini: Dict[str, Any] = get_llm_config(
-        configs.where(model=f"{openai_model_prefix}o3-mini")
-    )
-    sonar_r1: Dict[str, Any] = get_llm_config(
-        configs.where(model="openrouter/sonar-r1")
-    )
-    deepseek_v3: Dict[str, Any] = get_llm_config(
-        configs.where(model="deepseek/deepseek-v3")
-    )
-    gpt4_o1: Dict[str, Any] = get_llm_config(
-        configs.where(model=f"{openai_model_prefix}o1-preview")
-    )
-    llama_31_sonar_online: Dict[str, Any] = get_llm_config(
-        configs.where(model="openrouter/llama-3.1-sonar-large-online")
-    )
-    gpt4_turbo: Dict[str, Any] = get_llm_config(
-        configs.where(model=f"{openai_model_prefix}gpt-4-turbo-2024-04-09")
-    )
-    claude_35_haiku: Dict[str, Any] = get_llm_config(
-        configs.where(model="anthropic/claude-3.5-haiku")
-    )
-    gpt4o_mini: Dict[str, Any] = get_llm_config(
-        configs.where(model=f"{openai_model_prefix}gpt-4o-mini")
-    )
-    mistral_medium: Dict[str, Any] = get_llm_config(
-        configs.where(model="mistral/mistral-medium")
-    )
-    mistral_large: Dict[str, Any] = get_llm_config(
-        configs.where(model="mistral/mistral-large")
-    )
-    dalle: Dict[str, Any] = get_llm_config(configs.where(model="dall-e-3"))
-    codellama: Dict[str, Any] = get_llm_config(
-        configs.where(model="ollama/codellama:34b")
-    )
+    """Singleton configuration manager for Lazy-loading the configuration class
+    for LLM models.
+
+    Configs are only loaded when first accessed, improving import
+    performance.
+    """
+
+    _instance = None
+
+    def __new__(cls):
+        """Ensure only one instance exists."""
+        if cls._instance is None:
+            cls._instance = super().__new__(cls)
+            cls._instance._initialized = False
+        return cls._instance
+
+    # TODO add unit test to check all class props match props returned by this helper
+    # with something like:
+    # [
+    #         name for name, obj in inspect.getmembers(cls)
+    #         if isinstance(obj, property)
+    # ]
+    @classmethod
+    def get_available_LLM_names(cls) -> List[str]:
+        """Get LLM type property names from the class in a specific order."""
+        return [
+            'gpt_5',
+            'claude_45_sonnet',
+            'gemini_25_pro',
+            'or_gpt_5',
+            'claude_45_sonnet_thinking',
+            'claude_45_haiku',
+            'gpt_41',
+            'o4_mini',
+            'gpt_5_mini',
+            'o3',
+            'chatgpt_4o_latest',
+            'gemini_25_flash',
+            'kimi_k2',
+            'gemini_2_flash',
+            'deepseek_r1',
+        ]
+
+    @classmethod
+    def configs(self):
+        """Lazy-load configs on first access."""
+        if not hasattr(self, '_configs'):
+            self._configs = get_autogen().LLMConfig.from_json(env="llms_config")
+        return self._configs
+
+    @property
+    def gpt_5(self):
+        """Lazy-load GPT-5 config."""
+        if not hasattr(self, '_gpt_5'):
+            self._gpt_5 = get_llm_config(
+                self.configs().where(model=f"{_get_openai_model_prefix()}gpt-5")
+            )
+        return self._gpt_5
+
+    @property
+    def gemini_25_pro(self):
+        if not hasattr(self, '_gemini_25_pro'):
+            self._gemini_25_pro = get_llm_config(
+                self.configs().where(model="openrouter/gemini-2.5-pro")
+            )
+        return self._gemini_25_pro
+
+    @property
+    def claude_45_sonnet(self):
+        if not hasattr(self, '_claude_45_sonnet'):
+            self._claude_45_sonnet = get_llm_config(
+                self.configs().where(model="anthropic/claude-sonnet-4.5")
+            )
+        return self._claude_45_sonnet
+
+    @property
+    def or_gpt_5(self):
+        if not hasattr(self, '_or_gpt_5'):
+            self._or_gpt_5 = get_llm_config(
+                self.configs().where(model="openrouter/gpt-5")
+            )
+        return self._or_gpt_5
+
+    @property
+    def claude_45_sonnet_thinking(self):
+        if not hasattr(self, '_claude_45_sonnet_thinking'):
+            self._claude_45_sonnet_thinking = get_llm_config(
+                self.configs().where(model="anthropic/claude-sonnet-4.5-thinking"),
+                # anthropic requires specific params for thinking models
+                custom_config={"temperature": 1},
+            )
+        return self._claude_45_sonnet_thinking
+
+    @property
+    def claude_45_haiku(self):
+        if not hasattr(self, '_claude_45_haiku'):
+            self._claude_45_haiku = get_llm_config(
+                self.configs().where(model="anthropic/claude-haiku-4.5")
+            )
+        return self._claude_45_haiku
+
+    @property
+    def gpt_41(self):
+        if not hasattr(self, '_gpt_41'):
+            self._gpt_41 = get_llm_config(
+                self.configs().where(model=f"{_get_openai_model_prefix()}gpt-41")
+            )
+        return self._gpt_41
+
+    @property
+    def o4_mini(self):
+        if not hasattr(self, '_o4_mini'):
+            self._o4_mini = get_llm_config(
+                self.configs().where(model=f"{_get_openai_model_prefix()}o4-mini")
+            )
+        return self._o4_mini
+
+    @property
+    def gpt_5_mini(self):
+        if not hasattr(self, '_gpt_5_mini'):
+            self._gpt_5_mini = get_llm_config(
+                self.configs().where(model=f"{_get_openai_model_prefix()}gpt-5-mini")
+            )
+        return self._gpt_5_mini
+
+    @property
+    def o3(self):
+        if not hasattr(self, '_o3'):
+            self._o3 = get_llm_config(
+                self.configs().where(model=f"{_get_openai_model_prefix()}o3")
+            )
+        return self._o3
+
+    @property
+    def chatgpt_4o_latest(self):
+        if not hasattr(self, '_chatgpt_4o_latest'):
+            self._chatgpt_4o_latest = get_llm_config(
+                self.configs().where(
+                    model=f"{_get_openai_model_prefix()}chatgpt-4o-latest"
+                )
+            )
+        return self._chatgpt_4o_latest
+
+    @property
+    def gemini_25_flash(self):
+        if not hasattr(self, '_gemini_25_flash'):
+            self._gemini_25_flash = get_llm_config(
+                self.configs().where(model="openrouter/gemini-2.5-flash")
+            )
+        return self._gemini_25_flash
+
+    @property
+    def kimi_k2(self):
+        if not hasattr(self, '_kimi_k2'):
+            self._kimi_k2 = get_llm_config(
+                self.configs().where(model="openrouter/kimi-k2")
+            )
+        return self._kimi_k2
+
+    @property
+    def gemini_2_flash(self):
+        if not hasattr(self, '_gemini_2_flash'):
+            self._gemini_2_flash = get_llm_config(
+                self.configs().where(model="openrouter/gemini-2.0-flash")
+            )
+        return self._gemini_2_flash
+
+    @property
+    def deepseek_r1(self):
+        if not hasattr(self, '_deepseek_r1'):
+            self._deepseek_r1 = get_llm_config(
+                self.configs().where(model="deepseek/deepseek-r1"),
+                {"temperature": 0.6},
+            )
+        return self._deepseek_r1
+
+    @property
+    def o3_mini(self):
+        if not hasattr(self, '_o3_mini'):
+            self._o3_mini = get_llm_config(
+                self.configs().where(model=f"{_get_openai_model_prefix()}o3-mini")
+            )
+        return self._o3_mini
+
+    @property
+    def sonar_r1(self):
+        if not hasattr(self, '_sonar_r1'):
+            self._sonar_r1 = get_llm_config(
+                self.configs().where(model="openrouter/sonar-r1")
+            )
+        return self._sonar_r1
+
+    @property
+    def deepseek_v3(self):
+        if not hasattr(self, '_deepseek_v3'):
+            self._deepseek_v3 = get_llm_config(
+                self.configs().where(model="deepseek/deepseek-v3")
+            )
+        return self._deepseek_v3
+
+    @property
+    def grok_4_fast(self):
+        if not hasattr(self, '_grok_4_fast'):
+            self._grok_4_fast = get_llm_config(
+                self.configs().where(model="openrouter/grok-4-fast")
+            )
+        return self._grok_4_fast
+
+    @property
+    def gpt4_o1(self):
+        if not hasattr(self, '_gpt4_o1'):
+            self._gpt4_o1 = get_llm_config(
+                self.configs().where(model=f"{_get_openai_model_prefix()}o1-preview")
+            )
+        return self._gpt4_o1
+
+    @property
+    def llama_31_sonar_online(self):
+        if not hasattr(self, '_llama_31_sonar_online'):
+            self._llama_31_sonar_online = get_llm_config(
+                self.configs().where(model="openrouter/llama-3.1-sonar-large-online")
+            )
+        return self._llama_31_sonar_online
+
+    @property
+    def mistral_medium(self):
+        if not hasattr(self, '_mistral_medium'):
+            self._mistral_medium = get_llm_config(
+                self.configs().where(model="mistral/mistral-medium")
+            )
+        return self._mistral_medium
+
+    @property
+    def mistral_large(self):
+        if not hasattr(self, '_mistral_large'):
+            self._mistral_large = get_llm_config(
+                self.configs().where(model="mistral/mistral-large")
+            )
+        return self._mistral_large
+
+    @property
+    def dalle(self):
+        if not hasattr(self, '_dalle'):
+            self._dalle = get_llm_config(self.configs().where(model="dall-e-3"))
+        return self._dalle
+
+    @property
+    def codellama(self):
+        if not hasattr(self, '_codellama'):
+            self._codellama = get_llm_config(
+                self.configs().where(model="ollama/codellama:34b")
+            )
+        return self._codellama
 
 
-def get_config_options():
-    return list(get_type_hints(Configs).keys())
+# Lazy-loaded function decorators
+_generate_oai_reply_with_loading = None
 
 
-# setup autogen overrides
-generate_oai_reply_with_loading = prompt_utils.with_progress_bar(
-    description="Fetching LLM response..."
-)(autogen.ConversableAgent.generate_oai_reply)
-prompt_utils.set_custom_IO_overrides()
+def _get_generate_oai_reply_with_loading():
+    """Get the wrapped generate_oai_reply function, creating it if needed."""
+    global _generate_oai_reply_with_loading
+    if _generate_oai_reply_with_loading is None:
+        ensure_imports()
+        autogen = get_autogen()
+        prompt_utils = _get_prompt_utils()
+        _generate_oai_reply_with_loading = prompt_utils.with_progress_bar(
+            description="Fetching LLM response..."
+        )(autogen.ConversableAgent.generate_oai_reply)
+    return _generate_oai_reply_with_loading
+
+
+# track if global autogen I/O overrides have already been setup
+_autogen_overrides_setup = False
+
+
+def _setup_autogen_overrides():
+    """Setup autogen overrides.
+
+    Called when needed.
+    """
+    global _autogen_overrides_setup
+    if _autogen_overrides_setup:
+        return
+    autogen_message_transformers = get_autogen_message_transformers()
+    autogen_message_transformers.set_custom_IO_overrides()
+    _autogen_overrides_setup = True
+
 
 coder_system_message = """
 <prompt_explanation>
@@ -221,18 +564,20 @@ $output_code
 
 
 class AgentFactoryMap(TypedDict):
-    coder: Callable[[Any], autogen.AssistantAgent]
-    advanced_assistant: Callable[[Any], autogen.AssistantAgent]
-    docker_assistant: Callable[[Any], autogen.AssistantAgent]
-    github_actions_specialist: Callable[[Any], autogen.AssistantAgent]
-    task_planner: Callable[[Any], autogen.AssistantAgent]
-    basic_assistant: Callable[[Any], autogen.AssistantAgent]
-    nutritionist: Callable[[Any], autogen.AssistantAgent]
-    prompt_engineer: Callable[[Any], autogen.AssistantAgent]
-    master_chef: Callable[[Any], autogen.AssistantAgent]
-    critic: Callable[[Any], autogen.AssistantAgent]
-    qa_automation_engineer: Callable[[Any], autogen.AssistantAgent]
-    user_proxy: Callable[[Any], autogen.UserProxyAgent]
+    """Type hints for agent factories."""
+
+    coder: Callable[..., "AssistantAgent"]
+    advanced_assistant: Callable[..., "AssistantAgent"]
+    docker_assistant: Callable[..., "AssistantAgent"]
+    github_actions_specialist: Callable[..., "AssistantAgent"]
+    task_planner: Callable[..., "AssistantAgent"]
+    basic_assistant: Callable[..., "AssistantAgent"]
+    nutritionist: Callable[..., "AssistantAgent"]
+    prompt_engineer: Callable[..., "AssistantAgent"]
+    master_chef: Callable[..., "AssistantAgent"]
+    critic: Callable[..., "AssistantAgent"]
+    qa_automation_engineer: Callable[..., "AssistantAgent"]
+    user_proxy: Callable[..., "UserProxyAgent"]
 
 
 class AgentFactory:
@@ -246,14 +591,14 @@ class AgentFactory:
 
     def __init__(self):
         self.factories: AgentFactoryMap = {
-            'coder': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'coder': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "expert_coder",
-                llm_config=custom_config or Configs.gpt_41,
+                llm_config=custom_config or Configs().gpt_41,
                 system_message=coder_system_message,
             ),
-            'advanced_assistant': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'advanced_assistant': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "advanced_assistant",
-                llm_config=custom_config or Configs.gpt_5,
+                llm_config=custom_config or Configs().gpt_5,
                 system_message="""
                     Agent name = advanced_assistant. An advanced helper. You are expected to assist with complex tasks, which may include deep analysis,
                     generating sophisticated ideas, solving intricate problems, and more.
@@ -261,10 +606,10 @@ class AgentFactory:
                     You should be able to handle any advanced task passed to you with a high level of expertise.
                     """,
             ),
-            'docker_assistant': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'docker_assistant': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "docker_assistant",
                 llm_config={
-                    **(custom_config or Configs.claude_37_sonnet),
+                    **(custom_config or Configs().claude_45_sonnet),
                     **{"temperature": 0.1},
                 },
                 system_message="""
@@ -285,10 +630,10 @@ class AgentFactory:
                     from me could enhance the accuracy of your response, please let me know.
                     """,
             ),
-            'github_actions_specialist': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'github_actions_specialist': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "github_actions_specialist",
                 llm_config={
-                    **(custom_config or Configs.claude_37_sonnet),
+                    **(custom_config or Configs().claude_45_sonnet),
                     **{"temperature": 0.1},
                 },
                 system_message="""
@@ -305,9 +650,9 @@ class AgentFactory:
                     if additional context from my end could lead to a more accurate response, indicate so.
                     """,
             ),
-            'task_planner': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'task_planner': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "task_planner",
-                llm_config=custom_config or Configs.claude_37_thinking,
+                llm_config=custom_config or Configs().claude_45_sonnet,
                 system_message="""
                     Agent name = task_planner. You are an advanced language model whose task is to analyze and restructure user input into a clear, organized format.
                     Follow these step:
@@ -334,9 +679,9 @@ class AgentFactory:
                     lists, or sections as needed. Ensure all critical information is captured and clearly organized.
                     """,
             ),
-            'basic_assistant': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'basic_assistant': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "basic_assistant",
-                llm_config=custom_config or Configs.o4_mini,
+                llm_config=custom_config or Configs().o4_mini,
                 system_message="""
                     Agent name = basic_assistant. A general-purpose assistant helper.
                     You are expected to assist with a wide range of tasks, which may include answering questions,
@@ -345,9 +690,9 @@ class AgentFactory:
                     You should be able to handle any general task passed to you.
                     """,
             ),
-            'nutritionist': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'nutritionist': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "nutritionist",
-                llm_config=custom_config or Configs.o4_mini,
+                llm_config=custom_config or Configs().o4_mini,
                 system_message="""
                     Agent name = nutritionist. You are a vegan dietician/nutritionist. Your task is to analyze the macronutrients (proteins, fats, and carbohydrates)
                     of each dish presented to you. Based on your analysis, you will suggest complementary vegan foods that the individual
@@ -355,10 +700,10 @@ class AgentFactory:
                     Additionally, you will provide a total count of all the macronutrients in the dish.
                     """,
             ),
-            'prompt_engineer': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'prompt_engineer': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "prompt_engineer",
                 llm_config={
-                    **(custom_config or Configs.o3),
+                    **(custom_config or Configs().o3),
                     **{"temperature": 0.3},
                 },
                 system_message="""
@@ -393,19 +738,19 @@ class AgentFactory:
                     Providing feedback and suggestions to users on how to craft effective prompts based on the specific LLM in use.
                     """,
             ),
-            'master_chef': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'master_chef': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "master_chef",
-                llm_config=custom_config or Configs.claude_37_sonnet,
+                llm_config=custom_config or Configs().claude_45_sonnet,
                 system_message="""
                     Agent name = master_chef. A highly skilled and creative vegan chef with extensive knowledge of plant-based ingredients and cuisines from around the world.
                     This chef is adept at creating nutritious, flavorful, and visually appealing vegan dishes,
                     and is always up-to-date with the latest trends and innovations in vegan cooking.
                     """,
             ),
-            'critic': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'critic': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "critic",
                 llm_config={
-                    **(custom_config or Configs.gpt_5),
+                    **(custom_config or Configs().gpt_5),
                     **{"temperature": 0.1},
                 },
                 system_message="""
@@ -416,9 +761,9 @@ class AgentFactory:
                     Unless there are any specific and relevant suggestions for improvement, reply with 1 word: "DONE", nothing more just "DONE".
                     """,
             ),
-            'qa_automation_engineer': lambda custom_config=None, custom_name=None, **kwargs: autogen.AssistantAgent(
+            'qa_automation_engineer': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().AssistantAgent(
                 name=custom_name or "qa_automation_engineer",
-                llm_config=custom_config or Configs.claude_37_sonnet,
+                llm_config=custom_config or Configs().claude_45_sonnet,
                 system_message="""
                     Agent name = qa_automation_engineer. QA Automation Engineer LLM:
                     Develops and maintains automation frameworks for software testing.
@@ -430,23 +775,25 @@ class AgentFactory:
                     Collaborates with development teams to ensure software quality throughout all stages of the software development lifecycle.
                     """,
             ),
-            'image_analyst': lambda *args, **kwargs: MultimodalConversableAgent(
+            'image_analyst': lambda *args, **kwargs: (
+                ensure_imports() or _MultimodalConversableAgent
+            )(
                 name="image_analyst",
-                llm_config={**Configs.claude_37_sonnet, **{"temperature": 0.5}},
+                llm_config={**Configs().claude_45_sonnet, **{"temperature": 0.5}},
                 system_message="""
                     Agent name = image_analyst. Expert image analyst capable of categorizing all images provided to him.
                     """,
                 max_consecutive_auto_reply=10,
             ),
-            'image_generator': lambda *args, **kwargs: autogen.ConversableAgent(
+            'image_generator': lambda *args, **kwargs: get_autogen().ConversableAgent(
                 name="image_generator",
-                llm_config={**Configs.dalle, **{"temperature": 0.7}},
+                llm_config={**Configs().dalle, **{"temperature": 0.7}},
                 system_message="""
                     Agent name = image_generator. A creative agent tasked with generating high quality images.
                     """,
                 max_consecutive_auto_reply=3,
             ),
-            'user_proxy': lambda custom_config=None, custom_name=None, **kwargs: autogen.UserProxyAgent(
+            'user_proxy': lambda custom_config=None, custom_name=None, **kwargs: get_autogen().UserProxyAgent(
                 name="user_proxy",
                 human_input_mode="TERMINATE"
                 if kwargs.get('auto_execute_functions', False)
@@ -463,14 +810,14 @@ class AgentFactory:
                     # "use_docker": "python:3.10.13",
                     "use_docker": False,
                 },
-                llm_config=Configs.gemini_2_flash,
+                llm_config=Configs().gemini_2_flash,
                 system_message="""
                     Reply TERMINATE if the task has been solved at full satisfaction.
                     Otherwise, reply CONTINUE, or the reason why the task is not solved yet.
                     Can also execute code written by the other agents.
                     """,
             ),
-            'nocode_user_proxy': lambda *args, **kwargs: autogen.UserProxyAgent(
+            'nocode_user_proxy': lambda *args, **kwargs: get_autogen().UserProxyAgent(
                 name="nocode_user_proxy",
                 human_input_mode="ALWAYS",
                 max_consecutive_auto_reply=100,
@@ -486,7 +833,16 @@ class AgentFactory:
         }
 
     # extra initialization rules for agents
-    def _init_agent(self, agent: autogen.AssistantAgent, **kwargs):
+    def _init_agent(self, agent, **kwargs):
+        """Initialize an agent with custom settings.
+
+        Args:
+            agent: The agent to initialize
+            **kwargs: Additional configuration options
+        """
+        autogen = get_autogen()
+        _setup_autogen_overrides()  # Ensure overrides are set up when the first agent is setup
+
         agent_config = agent.llm_config.get("config_list", [{}])[0]
         model_client_cls = agent_config.get("model_client_cls")
         model_name = agent_config.get("model")
@@ -495,11 +851,11 @@ class AgentFactory:
         if kwargs.get('show_loading_animation', True):
             agent.replace_reply_func(
                 old_reply_func=autogen.ConversableAgent.generate_oai_reply,
-                new_reply_func=generate_oai_reply_with_loading,
+                new_reply_func=_get_generate_oai_reply_with_loading(),
             )
         client_class_map = {
-            'CitationEnabledOpenAIClient': CitationEnabledOpenAIClient,
-            'ReasoningEnabledOpenAIClient': ReasoningEnabledOpenAIClient,
+            'CitationEnabledOpenAIClient': _CitationEnabledOpenAIClient,
+            'ReasoningEnabledOpenAIClient': _ReasoningEnabledOpenAIClient,
         }
         if model_client_cls:
             agent.register_model_client(
@@ -514,7 +870,7 @@ class AgentFactory:
         if any(name in model_name for name in REASONING_MODELS):
             agent.update_system_message("")
 
-    def get_agents(self, names, overwrite_config=None) -> AgentFactoryMap:
+    def get_agents(self, names, overwrite_config=None) -> Dict[str, "AssistantAgent"]:
         """Retrieves a dictionary of agents.
 
         Args:
@@ -522,7 +878,7 @@ class AgentFactory:
             overwrite_config: Configuration dictionary to override default settings
 
         Returns:
-            A dictionary with agent names as keys and their corresponding configurations as values.
+            A dictionary with agent names as keys and their corresponding agent instances as values.
         """
 
         missing_agents = [name for name in names if name not in self.factories]
@@ -539,8 +895,8 @@ class AgentFactory:
         return agents
 
     def create_agent(
-        self, name: str, config, custom_name=None, **kwargs
-    ) -> autogen.AssistantAgent:
+        self, name: str, config=None, custom_name=None, **kwargs
+    ) -> "AssistantAgent":
         if name not in self.factories:
             raise ValueError(f"Unknown agent name: {name}")
         agent = self.factories[name](config, custom_name, **kwargs)
@@ -549,4 +905,4 @@ class AgentFactory:
 
 
 def get_agents_options():
-    return list(get_type_hints(AgentFactoryMap).keys())
+    return list(AgentFactoryMap.__annotations__.keys())

@@ -17,7 +17,7 @@
 7. [Running the Applications](#running-the-applications)
     1. [Start conversation](#1-start-conversation)
     2. [Ask Chef](#2-ask-ai-chef)
-9. [Setup local and third party LLMs](#setup-local-and-third-party-llms)
+8. [Setup local and third party LLMs](#setup-local-and-third-party-llms)
 
 This project is a small wrapper over [AutoGen](https://github.com/microsoft/autogen). It integrates the [LiteLLM](https://github.com/BerriAI/litellm) proxy server to give you easy access to any LLM (proprietary or open source), without having to leave the comfort of your terminal.
 
@@ -25,8 +25,11 @@ It uses the [Rich](https://github.com/Textualize/rich) and [prompt_toolkit](http
 
 Input:
 ![Example Terminal Output](docs/llm_terminal_input.jpg)
-Output
+Output:
 ![Example Terminal Output](docs/llm_terminal_response.jpg)
+
+For reasoning model it shows the COT separately:
+![Example Terminal Output for COT model response](docs/reasoning_model_response.jpg)
 
 ## Getting Started
 
@@ -97,7 +100,7 @@ For example, this enables usage of the litellm proxy dashboard UI, which offers 
 ## Configuration
 
 ### 1. Define the LLMs config
-Copy the `.env.secrets.example` file to create your own `.env.secrets` file and fill in your specific API keys for services you plan you use like OpenAI, MistralAI, Anthropic models or others.
+Copy the `.env.secrets.example` file to create your own `.env.secrets` file and fill in your specific API keys for services you plan to use like OpenAI, MistralAI, Anthropic models or others.
 
 ```sh
 cp .env.secrets.example .env.secrets
@@ -106,9 +109,9 @@ cp .env.secrets.example .env.secrets
 Edit the `.env.secrets` file with your preferred text editor and update the API keys as needed.
 
 ### 2. Configure the proxy server UI
-First you need to setup a postgres DB to store usage information from litellm. The easiest way to do this is to create a free [Superbase](https://supabase.com/) postgres instance hosted with AWS.
+First, you need to setup a postgres DB to store usage information from litellm. The easiest way to do this is to create a free [Supabase](https://supabase.com/) postgres instance hosted with AWS.
 
-Once the DB is ready to use, make sure you can connect o it
+Once the DB is ready to use, make sure you can connect to it
 
 ```sh
 psql postgresql://<user>:<password>@<host>:<port>/<dbname>
@@ -121,27 +124,27 @@ With these steps, you should be ready to work on the project and run the applica
 ## Useful tools
 ### 1. Lint code
 Run the following command
-```
+```sh
 python setup.py fix
 ```
 ### 2. Review code from file using gpt4
-```
+```sh
 python setup.py review --file path/to/file
 ```
 ### 3. Start the LiteLLM proxy server
 One of [LiteLLM](https://litellm.vercel.app/docs/)'s strong points is that it offers a unified interface for calling various LLMs among other cool features.
 In this context we use to extend AutoGen's capabilities to use other AI models (which is currently not supported out of the box, but is a WIP).
-```
+```sh
 python setup.py litellm
 ```
 
-### 4. Start Autogen Studio GUI (terminal usage recommended instead of ui)
+### ~~4. Start Autogen Studio GUI (terminal usage recommended instead of ui) (temporarily deprecated)~~
 Autogen also offers a [neat UI](https://github.com/microsoft/autogen/tree/main/samples/apps/autogen-studio).
 
 The following command starts the AGS app and makes the ui available at http://localhost:8083.
 The AGS sqlite DB together with other related artifacts are stored in `src/ui`.
 
-```
+```sh
 python setup.py ui
 ```
 
@@ -158,7 +161,7 @@ Steps:
 
 ## Running the Applications
 
-After setting up the environment and configuration, you can run the applications within the `src/applications/` directory.
+After setting up the environment and configuration, you can run the applications within the `applications/` directory.
 
 
 Executing an application creates a new conversation session based on the flow defined in that app.
@@ -175,9 +178,9 @@ New custom agents can be added in the agent definition file `agents/custom_agent
 You can either tweak the `message` inside each application, or execute the script and input your prompt in the command line (recommended).
 Prompts have multiline support so `Enter` just inserts a new line. In order to submit the prompt press `(Meta|Esc)+Enter`.
 
-### 2. Ask AI chef
-```
-python chef.py
+### 2. Ask AI Chef
+```sh
+python applications/chef.py
 ```
 
 The `chef.py` application demonstrates how to use agents to facilitate a conversation about cooking. It shows the setup of a group chat with multiple agents and the initiation of a chat with a user query.
@@ -188,7 +191,7 @@ The `chef.py` application demonstrates how to use agents to facilitate a convers
 
 1. Install the [ollama tool](https://github.com/jmorganca/ollama)
 2. Download any model you want for example for codellama run
-```
+```sh
 ollama run codellama
 ```
 3. Update the `litellm_config.yml` file to contain the new local model references or references to any other API services like [Mistral AI](https://mistral.ai/).
