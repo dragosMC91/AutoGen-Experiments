@@ -114,31 +114,13 @@ def get_llms_config():
         # AnthropicAI models
         {
             "base_url": base_url,
-            "model": "anthropic/claude-3-opus",
-            "api_key": os.getenv('LITELLM_MASTER_KEY'),
-            "price": [0.015, 0.075],
-        },
-        {
-            "base_url": base_url,
-            "model": "anthropic/claude-3.5-sonnet",
+            "model": "anthropic/claude-sonnet-4.5",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.003, 0.015],
         },
         {
             "base_url": base_url,
-            "model": "anthropic/claude-3.7-sonnet",
-            "api_key": os.getenv('LITELLM_MASTER_KEY'),
-            "price": [0.003, 0.015],
-        },
-        {
-            "base_url": base_url,
-            "model": "anthropic/claude-sonnet-4",
-            "api_key": os.getenv('LITELLM_MASTER_KEY'),
-            "price": [0.003, 0.015],
-        },
-        {
-            "base_url": base_url,
-            "model": "anthropic/claude-sonnet-4-thinking",
+            "model": "anthropic/claude-sonnet-45-thinking",
             "model_client_cls": "ReasoningEnabledOpenAIClient",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.003, 0.015],
@@ -151,7 +133,7 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
-            "model": "anthropic/claude-3.5-haiku",
+            "model": "anthropic/claude-haiku-4.5",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.001, 0.005],
         },
@@ -189,6 +171,12 @@ def get_llms_config():
         },
         {
             "base_url": base_url,
+            "model": "openrouter/grok-4-fast",
+            "api_key": os.getenv('LITELLM_MASTER_KEY'),
+            "price": [0.0002, 0.0005],
+        },
+        {
+            "base_url": base_url,
             "model": "openrouter/gemini-2.5-flash",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.00015, 0.0006],
@@ -198,13 +186,6 @@ def get_llms_config():
             "model": "openrouter/gemini-2.5-pro",
             "api_key": os.getenv('LITELLM_MASTER_KEY'),
             "price": [0.00125, 0.01],
-        },
-        {
-            "base_url": base_url,
-            "model": "openrouter/claude-3.7-thinking",
-            "api_key": os.getenv('LITELLM_MASTER_KEY'),
-            "model_client_cls": "ReasoningEnabledOpenAIClient",
-            "price": [0.0003, 0.0015],
         },
         {
             "base_url": base_url,

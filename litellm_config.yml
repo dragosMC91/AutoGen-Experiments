@@ -1,3 +1,4 @@
+# https://docs.litellm.ai/docs/proxy/config_settings#environment-variables---reference
 model_list:
 
   - model_name: ollama/codellama
@@ -109,41 +110,23 @@ model_list:
       api_key: os.environ/MISTRAL_API_KEY
       api_base: https://api.mistral.ai/v1
 
-  - model_name: anthropic/claude-3-opus
+  - model_name: anthropic/claude-sonnet-4.5
     litellm_params:
-      model: claude-3-opus-20240229
+      model: claude-sonnet-4-5-20250929
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
-      # explicit max_tokens required because a 256 default is being set otherwise
-      max_tokens: 4096
 
-  - model_name: anthropic/claude-3.5-sonnet
+  - model_name: anthropic/claude-haiku-4.5
     litellm_params:
-      model: claude-3-5-sonnet-20241022
+      model: claude-haiku-4-5-20251001
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
-      max_tokens: 4096
 
-  - model_name: anthropic/claude-3.7-sonnet
+  - model_name: anthropic/claude-sonnet-4.5-thinking
     litellm_params:
-      model: claude-3-7-sonnet-20250219
+      model: claude-sonnet-4-5-20250929
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
-      max_tokens: 4096
-
-  - model_name: anthropic/claude-sonnet-4
-    litellm_params:
-      model: claude-sonnet-4-20250514
-      api_base: https://api.anthropic.com/v1/messages
-      api_key: os.environ/ANTHROPIC_API_KEY
-      max_tokens: 4096
-
-  - model_name: anthropic/claude-sonnet-4-thinking
-    litellm_params:
-      model: claude-sonnet-4-20250514
-      api_base: https://api.anthropic.com/v1/messages
-      api_key: os.environ/ANTHROPIC_API_KEY
-      max_tokens: 4096
       thinking: 
         type: enabled
         # 1024 - low, 2048 - medium, 4096 - high
@@ -154,113 +137,99 @@ model_list:
       model: claude-opus-4-20250514
       api_base: https://api.anthropic.com/v1/messages
       api_key: os.environ/ANTHROPIC_API_KEY
-      max_tokens: 4096
-
-  - model_name: anthropic/claude-3.5-haiku
-    litellm_params:
-      model: claude-3-5-haiku-20241022
-      api_base: https://api.anthropic.com/v1/messages
-      api_key: os.environ/ANTHROPIC_API_KEY
-      max_tokens: 4096
 
   - model_name: deepseek/deepseek-v3
     litellm_params:
       model: deepseek/deepseek-chat
       api_base: https://api.deepseek.com
       api_key: os.environ/DEEPSEEK_API_KEY
-      max_tokens: 4096
 
   - model_name: deepseek/deepseek-r1
     litellm_params:
       model: deepseek/deepseek-reasoner
       api_base: https://api.deepseek.com
       api_key: os.environ/DEEPSEEK_API_KEY
-      max_tokens: 4096
 
   - model_name: openrouter/gpt-5
     litellm_params:
       model: openrouter/openai/gpt-5
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
-  - model_name: openrouter/claude-3.7-thinking
+  - model_name: openrouter/claude-sonnet-4.5
     litellm_params:
-      model: openrouter/anthropic/claude-3.7-sonnet:thinking
-      # api_base: https://api.anthropic.com/v1/messages
+      model: openrouter/anthropic/claude-sonnet-4.5
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
+
+  - model_name: openrouter/claude-haiku-4.5
+    litellm_params:
+      model: openrouter/anthropic/claude-haiku-4.5
+      api_key: os.environ/OPENROUTER_API_KEY
+
+  - model_name: openrouter/grok-4-fast
+    litellm_params:
+      model: openrouter/x-ai/grok-4-fast
+      api_key: os.environ/OPENROUTER_API_KEY
 
   - model_name: openrouter/gemini-2.0-flash
     litellm_params:
       model: openrouter/google/gemini-2.0-flash-001
       # api_base: https://openrouter.ai/api/v1/chat/completions
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
   - model_name: openrouter/gemini-2.5-flash
     litellm_params:
       model: openrouter/google/gemini-2.5-flash-preview-05-20
       # api_base: https://openrouter.ai/api/v1/chat/completions
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
   - model_name: openrouter/gemini-2.5-flash-thinking
     litellm_params:
       model: openrouter/google/gemini-2.5-flash-preview-05-20:thinking
       # api_base: https://openrouter.ai/api/v1/chat/completions
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
   - model_name: openrouter/gemini-2.5-pro
     litellm_params:
       api_base: https://openrouter.ai/api/v1/chat/completions
       model: openrouter/google/gemini-2.5-pro-preview
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
   - model_name: google/gemini-2.0-flash
     litellm_params:
       model: gemini/gemini-2.0-flash
       api_key: os.environ/GEMINI_API_KEY
-      max_tokens: 4096
 
   - model_name: google/gemini-2.5-pro
     litellm_params:
       model: gemini/gemini-2.5-pro-exp-03-25
       api_key: os.environ/GEMINI_API_KEY
-      max_tokens: 4096
 
   - model_name: openrouter/llama-3.1-sonar-large-online
     litellm_params:
       model: openrouter/perplexity/llama-3.1-sonar-large-128k-online
       # api_base: https://openrouter.ai/api/v1/chat/completions
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
   - model_name: openrouter/sonar-r1
     litellm_params:
       model: openrouter/perplexity/sonar-reasoning
       # api_base: https://openrouter.ai/api/v1/chat/completions
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
   - model_name: openrouter/deepseek-v3
     litellm_params:
       model: openrouter/deepseek/deepseek-chat
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
   - model_name: openrouter/deepseek-r1
     litellm_params:
       model: openrouter/deepseek/deepseek-r1
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
   - model_name: openrouter/kimi-k2
     litellm_params:
       model: openrouter/moonshotai/kimi-k2
       api_key: os.environ/OPENROUTER_API_KEY
-      max_tokens: 4096
 
 litellm_settings:
   drop_params: True
@@ -271,3 +240,7 @@ general_settings:
   database_url: os.environ/DATABASE_URL
   database_connection_pool_limit: 100
   database_connection_timeout: 60
+
+router_settings:
+  default_litellm_params:
+    max_tokens: 16384
